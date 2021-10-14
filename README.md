@@ -5,6 +5,14 @@ Verkkosovellus jolla voit seurata tiettyjen junien liikkeitä reaaliajassa. Tule
 
 Toteutettu Reactilla. Karttapalveluna Leaflet. Päivittyvä data tulee väyläviraston kautta avoimena datana.
 
+```npm version 6.14.15```
+
+Asenna paketit komennolla:
+```npm install```
+
+Aja sovellusta komennolla:
+```npm start```
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
