@@ -1,0 +1,15 @@
+#mapid { 
+  height: 180px; 
+  margin: 30px;
+}
+
+.leaflet-container {
+  width: 100wh; 
+  height: 80vh;
+}
+
+.leaflet-popup {
+  position: absolute;
+  text-align: center;
+  margin-bottom: 60px !important;
+}
