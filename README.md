@@ -1,9 +1,9 @@
 # train-tracking-app
 Junien seuranta-palvelu
 
-Verkkosovellus jolla voit seurata tiettyjen junien liikkeitä. Tulevaisuudessa mahdollisesti tarkemmin tietoja junista ja niiden muokkauksia yms.
+Verkkosovellus jolla voit seurata tiettyjen junien liikkeitä reaaliajassa. Tulevaisuudessa mahdollisesti tarkemmin tietoja junista ja niiden muokkauksia yms.
 
-Toteutettu Reactilla. Karttapalveluna Leaflet.
+Toteutettu Reactilla. Karttapalveluna Leaflet. Päivittyvä data tulee väyläviraston kautta avoimena datana.
 
 # Getting Started with Create React App
 
