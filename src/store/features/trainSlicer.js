@@ -10,7 +10,8 @@ export const trainSlice = createSlice({
     coordinates: [62.24147, 25.72088],
     allCoordinates: [],
     allTrains: [],
-    zoom: 13
+    zoom: 13,
+    trainInfo: []
   },
   reducers: {
     updateTrain:(state, action) => {
@@ -27,11 +28,14 @@ export const trainSlice = createSlice({
     },
     updatePollingCount: state => {
       state.pollingCount += 1;
+    },
+    updateTrainInfo: (state, action) => {
+      state.trainInfo = action.payload;
     }
   }
 })
 
 // Action creators are generated for each case reducer function
-export const { updateTrain, updateAllTrains, updatePollingCount } = trainSlice.actions
+export const { updateTrain, updateAllTrains, updatePollingCount, updateTrainInfo } = trainSlice.actions
 
 export default trainSlice.reducer

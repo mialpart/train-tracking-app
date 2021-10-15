@@ -134,7 +134,8 @@ class MapComponent extends Component {
       coordinates: [62.24147, 25.72088],
       allCoordinates: [],
       zoom: 13,
-      speed: 0
+      speed: 0,
+      trainInfo: []
     };
 
     store.subscribe(() => {
@@ -147,6 +148,7 @@ class MapComponent extends Component {
         coordinates: store.getState().train.coordinates,
         allCoordinates: store.getState().train.allCoordinates,
         zoom: store.getState().train.zoom,
+        trainInfo: store.getState().train.trainInfo
       });
     });
   }
@@ -174,7 +176,6 @@ class MapComponent extends Component {
     DigitrafficService.getLatestCoordinate(this.state.train)
       .then((data) => {
         if (data && data.length > 0) {
-          console.log(data)
           let coordinate = [
             data[0].location.coordinates[1],
             data[0].location.coordinates[0],
@@ -193,8 +194,26 @@ class MapComponent extends Component {
       });
   };
 
+  getTrainInfo = () => {
+    let info = {
+      operatorShortCode: "",
+      trainType: "",
+      runningCurrently: ""
+    }
+    if(this.state.trainInfo && this.state.trainInfo.length > 0) {
+      info = {
+        operatorShortCode: this.state.trainInfo[0].operatorShortCode,
+        trainType: this.state.trainInfo[0].trainType,
+        runningCurrently: this.state.trainInfo[0].runningCurrently ? "Kyllä" : "Ei"
+      }
+    }
+    return info;
+  }
+
   render() {
     let currentZoom = this.state.zoom;
+    let trainInfo = this.getTrainInfo();
+    
     return (
       <div id="mapid">
         <MapContainer
@@ -233,8 +252,10 @@ class MapComponent extends Component {
             }
           >
             <Popup autoPan={false}>
-              Junan numero {this.state.train} <br/>
-              Nopeus: {this.state.currentSpeed}
+              Operaattori: {trainInfo.operatorShortCode} <br/>
+              Juna: {trainInfo.trainType} {this.state.train} <br/>
+              Nopeus: {this.state.currentSpeed} <br/>
+              Liikkeessä: {trainInfo.runningCurrently} <br/>
             </Popup>
           </Marker>
         </MapContainer>

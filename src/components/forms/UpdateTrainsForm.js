@@ -3,12 +3,13 @@ import store from "../../store/train";
 import { Button, Dropdown } from "semantic-ui-react";
 import { useDispatch } from "react-redux";
 import DigitrafficService from "../../services/DigitrafficService";
-import { updateAllTrains, updateTrain } from "../../store/features/trainSlicer";
+import { updateAllTrains, updateTrain, updateTrainInfo } from "../../store/features/trainSlicer";
 
 function UpdateTrainsForm(props) {
   //const trainId = useSelector((state) => state.train.train);
   function handleDropDownSelect (event, data) {
     getLatestCoordinatForTrain(data.value, dispatch);
+    getLatestInfoForTrain(data.value, dispatch);
   };
   const dispatch = useDispatch();
   return (
@@ -45,6 +46,24 @@ function getLatestCoordinatForTrain(trainNumber, dispatch) {
         ];
         dispatch(
           updateTrain({ coordinates: coordinate, trainNumber: trainNumber })
+        );
+        if(store.getState().train.allTrains.length === 0) (
+          storeAllTrains(dispatch)
+        )
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
+
+//functio jossa asetetaan dispatchilla trainId etc
+function getLatestInfoForTrain(trainNumber, dispatch) {
+  DigitrafficService.getLatestTrainInfo(trainNumber)
+    .then((data) => {
+      if (data && data.length > 0) {
+        dispatch(
+          updateTrainInfo(data)
         );
         if(store.getState().train.allTrains.length === 0) (
           storeAllTrains(dispatch)
