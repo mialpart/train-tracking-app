@@ -134,6 +134,7 @@ class MapComponent extends Component {
       coordinates: [62.24147, 25.72088],
       allCoordinates: [],
       zoom: 13,
+      speed: 0
     };
 
     store.subscribe(() => {
@@ -173,12 +174,14 @@ class MapComponent extends Component {
     DigitrafficService.getLatestCoordinate(this.state.train)
       .then((data) => {
         if (data && data.length > 0) {
+          console.log(data)
           let coordinate = [
             data[0].location.coordinates[1],
             data[0].location.coordinates[0],
           ];
           this.setState({
             coordinates: coordinate,
+            currentSpeed: data[0].speed 
           });
           //mapStateToProps ja mapDispatchToProps tarvitaan että data päivittyy kunnolla
           this.props.updatePollingCount();
@@ -230,7 +233,8 @@ class MapComponent extends Component {
             }
           >
             <Popup autoPan={false}>
-              TODO: <br /> Juna numero {this.state.train}
+              Junan numero {this.state.train} <br/>
+              Nopeus: {this.state.currentSpeed}
             </Popup>
           </Marker>
         </MapContainer>
