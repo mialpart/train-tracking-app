@@ -22,12 +22,16 @@ export const trainSlice = createSlice({
       state.coordinates = action.payload.coordinates
     },
     updateAllTrains:(state, action) => {
-        state.allTrains = action.payload
-      }
+      state.allTrains = action.payload
+      console.log("Juna-listaus päivitetty")
+    },
+    updatePollingCount: state => {
+      state.pollingCount += 1;
+    }
   }
 })
 
 // Action creators are generated for each case reducer function
-export const { updateTrain, updateAllTrains } = trainSlice.actions
+export const { updateTrain, updateAllTrains, updatePollingCount } = trainSlice.actions
 
 export default trainSlice.reducer

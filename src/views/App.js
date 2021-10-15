@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import Profile from "./profile/Profile";
 import About from "./about/About";
-import MapComponent from "./../components/map/MapComponent";
+import MapView from "./../views/map/MapView";
 //import Button from './../components/buttons/Button';
 import NavBar from "./../components/nav/NavBar";
 
@@ -11,8 +11,8 @@ function RouterComponent() {
   return (
     <Router>
       <NavBar />
-      <Route path="/" exact render={() => <Profile />} />
-      <Route path="/home" exact render={() => <MapComponent />} />
+      <Route path="/" exact render={() => <MapView />} />
+      <Route path="/home" exact render={() => <MapView />} />
       <Route path="/about" exact render={() => <About />} />
       <Route path="/profile" exact render={() => <Profile />} />
     </Router>

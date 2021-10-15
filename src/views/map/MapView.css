@@ -22,3 +22,7 @@
 .dropdown-trains input {
   z-index: 100000 !important;
 }
+
+.btn-update {
+  margin-bottom: 15px;
+}
