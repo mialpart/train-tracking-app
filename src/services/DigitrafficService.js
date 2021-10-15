@@ -9,6 +9,15 @@ const DigitrafficService = {
             console.error(error);
         })
     },
+
+    getLatestCoordinateAll: function() {
+        var url = "https://rata.digitraffic.fi/api/v1/train-locations/latest/";
+        return axios.get(url).then(data => {
+            return data.data;
+        }).catch(error => {
+            console.error(error);
+        })
+    },
 };
 
 export default DigitrafficService;

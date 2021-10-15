@@ -4,11 +4,15 @@ import './index.css';
 import 'semantic-ui-css/semantic.min.css'
 import App from './views/App';
 import reportWebVitals from './reportWebVitals';
+import trainStore from './store/train'
+import { Provider } from 'react-redux'
 
 ReactDOM.render(
+  <Provider store={trainStore}>
   <React.StrictMode>
     <App />
-  </React.StrictMode>,
+  </React.StrictMode>
+  </Provider>,
   document.getElementById('root')
 );
 

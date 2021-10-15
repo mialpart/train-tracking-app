@@ -5,7 +5,7 @@ import trainImage from './../../assets/images/train-tunnel.svg';
 
 import './NavBar.css';
 
-export default class MenuExampleSecondary extends Component {
+export default class NavBar extends Component {
   state = { activeItem: 'home' }
 
   handleItemClick = (e, { name }) => {
