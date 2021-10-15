@@ -1,16 +1,13 @@
-
+import _ from "lodash";
 import { Component } from "react";
 import store from "./../../store/train";
 import DigitrafficService from "../../services/DigitrafficService";
-import MapComponent from './../../components/map/MapComponent';
-import UpdateTrainsForm from './../../components/forms/UpdateTrainsForm';
+import MapComponent from "./../../components/map/MapComponent";
+import UpdateTrainsForm from "./../../components/forms/UpdateTrainsForm";
 import "./MapView.css";
 import "leaflet/dist/leaflet.css";
-//import DigitrafficService from "../../services/DigitrafficService";
 import { connect } from "react-redux";
-//import { updateTrain, updateAllTrains } from "../../store/features/trainSlicer";
 
-//import { Button, Dropdown } from "semantic-ui-react";
 
 class MapView extends Component {
   constructor(props) {
@@ -44,35 +41,66 @@ class MapView extends Component {
       .catch((error) => {
         console.log(error);
       });
+
+    //Ei tehdä tällä reduxiin tallennusta. Antaa herjaa:
+    //SerializableStateInvariantMiddleware took 509ms, which is more than the warning threshold of 32ms.
+    DigitrafficService.getAllTrainInfoToday()
+      .then((data) => {
+        if (data && data.length > 0) {
+          this.setState({
+            allTrainInfoToday: data,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
-  render() {
+
+  getAllDropDownTrains = () => {
     let allTrains = [];
     if (this.state.allTrains && this.state.allTrains.length > 0) {
       allTrains = this.state.allTrains.map((train) => {
-        return {
+        let item = {
           key: train.trainNumber,
           text: train.trainNumber,
           value: train.trainNumber,
         };
+
+        if (this.state.allTrainInfoToday && !_.isEmpty(this.state.allTrainInfoToday)) {
+          let info = this.state.allTrainInfoToday.find((trainInfo) => {
+            return trainInfo.trainNumber === train.trainNumber;
+          });
+          //Lisää tunnus (IC,T yms), jos sellainen löytyy
+          if (info) {
+            item.text = info.trainType + " " + train.trainNumber;
+          }
+        }
+        return item;
       });
     }
+    return allTrains;
+  };
+
+  render() {
+    let allTrains = this.getAllDropDownTrains();
     return (
       <div>
-      <h2>PollingCount: {this.state.pollingCount}</h2>
+        <h2>PollingCount: {this.state.pollingCount}</h2>
         <div>
           <UpdateTrainsForm
             name={"Päivitä junalistaus"}
             allTrains={allTrains}
           ></UpdateTrainsForm>
         </div>
-      <MapComponent></MapComponent>
+        <MapComponent></MapComponent>
       </div>
     );
   }
 }
 
-function mapStateToProps(state){
-  return{
+function mapStateToProps(state) {
+  return {
     pollingCount: state.pollingCount
   };
 }

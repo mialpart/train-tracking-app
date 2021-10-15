@@ -6,6 +6,7 @@ import {
   LayersControl,
   useMap,
 } from "react-leaflet";
+import _ from "lodash";
 import "./MapComponent.css";
 import "leaflet/dist/leaflet.css";
 import store from "./../../store/train";
@@ -107,7 +108,7 @@ function MapLayersControl() {
           url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png"
         />
       </LayersControl.BaseLayer>
-      //Rautatie-taso kartalle
+      {/* Rautatie-taso kartalle */}
       <LayersControl.Overlay checked name="Raide-taso">
         <TileLayer
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -252,7 +253,7 @@ class MapComponent extends Component {
             }
           >
             <Popup autoPan={false}>
-              Operaattori: {trainInfo.operatorShortCode} <br/>
+              Operaattori: {_.toUpper(trainInfo.operatorShortCode)} <br/>
               Juna: {trainInfo.trainType} {this.state.train} <br/>
               Nopeus: {this.state.currentSpeed} <br/>
               Liikkeessä: {trainInfo.runningCurrently} <br/>
