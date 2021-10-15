@@ -5,7 +5,6 @@ import {
   Popup,
   LayersControl,
   useMap,
-  MapConsumer,
 } from "react-leaflet";
 import { Component } from "react";
 import store from "./../../store/train";
@@ -14,8 +13,10 @@ import { Icon } from "leaflet";
 import "./MapComponent.css";
 import "leaflet/dist/leaflet.css";
 import DigitrafficService from "./../../services/DigitrafficService";
-import { useSelector, useDispatch } from "react-redux";
-import { updateTrain } from "./../../store/features/trainSlicer";
+import { useDispatch } from "react-redux";
+import { updateTrain, updateAllTrains } from "./../../store/features/trainSlicer";
+
+import { Button, Dropdown } from "semantic-ui-react";
 
 /*
 const baseLayers = [
@@ -128,22 +129,39 @@ function ChangeTrainButton(props) {
   //const trainId = useSelector((state) => state.train.train);
   const dispatch = useDispatch();
   return (
-    <button
+    <div className="btn-update">
+    <Button 
       aria-label={props.name}
       onClick={() => {
-        getLatestCoordinatForTrain(props.trainNumber, dispatch);
+        storeAllTrains(dispatch);
       }}
     >
       {props.name}
-    </button>
+    </Button>
+    </div>
   );
+}
+
+//functio jossa asetetaan dispatchilla trainId etc
+function storeAllTrains(dispatch) {
+  DigitrafficService.getLatestCoordinateAll()
+    .then((data) => {
+      if (data && data.length > 0) {
+        dispatch(
+          updateAllTrains(data)
+        );
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 }
 
 //functio jossa asetetaan dispatchilla trainId etc
 function getLatestCoordinatForTrain(trainNumber, dispatch) {
   DigitrafficService.getLatestCoordinate(trainNumber)
     .then((data) => {
-      if(data && data.length > 0) {
+      if (data && data.length > 0) {
         let coordinate = [
           data[0].location.coordinates[1],
           data[0].location.coordinates[0],
@@ -151,11 +169,31 @@ function getLatestCoordinatForTrain(trainNumber, dispatch) {
         dispatch(
           updateTrain({ coordinates: coordinate, trainNumber: trainNumber })
         );
+        if(store.getState().train.allTrains.length === 0) (
+          storeAllTrains(dispatch)
+        )
       }
     })
     .catch((error) => {
       console.log(error);
     });
+}
+
+
+function TrainDropDown(props) {
+  function handleDropDownSelect (event, data) {
+    getLatestCoordinatForTrain(data.value, dispatch);
+  };
+  const dispatch = useDispatch();
+  return (
+    <Dropdown className="dropdown-trains"
+      onChange={handleDropDownSelect}
+      placeholder="State"
+      search
+      selection
+      options={props.allTrains}
+    />
+  );
 }
 
 class MapComponent extends Component {
@@ -168,6 +206,7 @@ class MapComponent extends Component {
       delay: 4000,
       coordinates: [62.24147, 25.72088],
       allCoordinates: [],
+      allTrains: [],
       zoom: 13,
     };
 
@@ -181,6 +220,7 @@ class MapComponent extends Component {
         delay: store.getState().train.delay,
         coordinates: store.getState().train.coordinates,
         allCoordinates: store.getState().train.allCoordinates,
+        allTrains: store.getState().train.allTrains,
         zoom: store.getState().train.zoom,
       });
     });
@@ -188,6 +228,17 @@ class MapComponent extends Component {
 
   componentDidMount() {
     this.interval = setInterval(this.tick, this.state.delay);
+    DigitrafficService.getLatestCoordinateAll()
+      .then((data) => {
+        if (data && data.length > 0) {
+          this.setState({
+            allTrains: data,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
   componentDidUpdate(prevProps, prevState) {
     if (prevState.delay !== this.state.delay) {
@@ -210,7 +261,7 @@ class MapComponent extends Component {
   tick = () => {
     DigitrafficService.getLatestCoordinate(this.state.train)
       .then((data) => {
-        if(data && data.length > 0) {
+        if (data && data.length > 0) {
           let coordinate = [
             data[0].location.coordinates[1],
             data[0].location.coordinates[0],
@@ -228,20 +279,28 @@ class MapComponent extends Component {
 
   //TODO tee dropdown josta voi hakea junan id:n
   render() {
+    let allTrains = [];
+    if(this.state.allTrains && this.state.allTrains.length > 0) {
+      allTrains = this.state.allTrains.map((train) => {
+        return {
+          key: train.trainNumber,
+          text: train.trainNumber,
+          value: train.trainNumber,
+        };
+      });
+    }
     let currentZoom = this.state.zoom;
     return (
       <div id="mapid">
         <h2>PollingCount: {this.state.pollingCount}</h2>
+        <TrainDropDown
+          handleDropDownSelect={this.handleDropDownSelect}
+          allTrains={allTrains}
+        ></TrainDropDown>
         <div>
           <ChangeTrainButton
-            trainNumber={8}
-            name={"Juna 1"}
+            name={"Päivitä junalistaus"}
           ></ChangeTrainButton>
-          <ChangeTrainButton
-            trainNumber={3}
-            name={"Juna 2"}
-          ></ChangeTrainButton>
-          <span>{this.state.train}</span>
         </div>
         <MapContainer
           center={this.state.coordinates}

@@ -9,7 +9,8 @@ export const trainSlice = createSlice({
     delay: 4000,
     coordinates: [62.24147, 25.72088],
     allCoordinates: [],
-    zoom: 13,
+    allTrains: [],
+    zoom: 13
   },
   reducers: {
     updateTrain:(state, action) => {
@@ -19,11 +20,14 @@ export const trainSlice = createSlice({
       // immutable state based off those changes
       state.train = action.payload.trainNumber
       state.coordinates = action.payload.coordinates
-    }
+    },
+    updateAllTrains:(state, action) => {
+        state.allTrains = action.payload
+      }
   }
 })
 
 // Action creators are generated for each case reducer function
-export const { updateTrain } = trainSlice.actions
+export const { updateTrain, updateAllTrains } = trainSlice.actions
 
 export default trainSlice.reducer
