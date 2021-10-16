@@ -13,6 +13,7 @@ export const trainSlice = createSlice({
     zoom: 13,
     trainInfo: [],
     allTrainInfoToday: [],
+    allTrainsSelected: false
   },
   reducers: {
     updateTrain: (state, action) => {
@@ -27,6 +28,9 @@ export const trainSlice = createSlice({
     updateAllTrains: (state, action) => {
       state.allTrains = action.payload;
       console.log("Juna-listaus päivitetty");
+    },
+    isAllTrainsSelected: (state, action) => {
+      state.allTrainsSelected = action.payload;
     },
     updateAllTrainCoordinates: (state, action) => {
       state.allCoordinates = action.payload; 
@@ -52,7 +56,8 @@ export const {
   updatePollingCount,
   updateTrainInfo,
   updateAllTrainInfoToday,
-  updateAllTrainCoordinates
+  updateAllTrainCoordinates,
+  isAllTrainsSelected
 } = trainSlice.actions;
 
 export default trainSlice.reducer;

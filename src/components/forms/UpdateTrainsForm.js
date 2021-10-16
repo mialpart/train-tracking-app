@@ -3,31 +3,49 @@ import store from "../../store/train";
 import { Button, Dropdown } from "semantic-ui-react";
 import { useDispatch } from "react-redux";
 import DigitrafficService from "../../services/DigitrafficService";
-import {bindActionCreators} from 'redux';
+import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import {
   updateAllTrains,
   updateTrain,
   updateTrainInfo,
+  isAllTrainsSelected
 } from "../../store/features/trainSlicer";
+
+function TrainSlider() {
+  const dispatch = useDispatch();
+  function handleCheckBoxSelect(event, data) {
+    dispatch(isAllTrainsSelected(event.target.checked));
+    console.log(event.target.checked)
+  }
+  return (
+    <div class="ui slider checkbox">
+      <input onChange={handleCheckBoxSelect} type="checkbox" name="newsletter" />
+      <label>Näytä kaikki junat kartalla</label>
+    </div>
+  );
+}
 
 function UpdateTrainsForm(props) {
   //const trainId = useSelector((state) => state.train.train);
+  const dispatch = useDispatch();
   function handleDropDownSelect(event, data) {
     getLatestCoordinatForTrain(data.value, dispatch);
     getLatestInfoForTrain(data.value, dispatch);
   }
-  const dispatch = useDispatch();
   return (
     <div>
-      <Dropdown
-        className="dropdown-trains"
-        onChange={handleDropDownSelect}
-        placeholder="State"
-        search
-        selection
-        options={props.allTrains}
-      />
+      <div>
+        <Dropdown
+          className="dropdown-trains"
+          onChange={handleDropDownSelect}
+          placeholder="State"
+          search
+          selection
+          options={props.allTrains}
+        />
+        <TrainSlider ></TrainSlider>
+      </div>
       <div className="btn-update">
         <Button
           aria-label={props.name}
@@ -92,11 +110,10 @@ function storeAllTrains(dispatch) {
     });
 }
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators({}, dispatch)
+  return bindActionCreators({}, dispatch);
 }
 
-function mapStateToProps(state){
-  return{
-  };
+function mapStateToProps(state) {
+  return {};
 }
-export default connect(mapStateToProps, mapDispatchToProps)(UpdateTrainsForm)
+export default connect(mapStateToProps, mapDispatchToProps)(UpdateTrainsForm);

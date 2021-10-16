@@ -93,7 +93,7 @@ class MapView extends Component {
             allTrains={allTrains}
           ></UpdateTrainsForm>
         </div>
-        <MapComponent></MapComponent>
+        <MapComponent allTrains={this.state.allTrains}></MapComponent>
       </div>
     );
   }
