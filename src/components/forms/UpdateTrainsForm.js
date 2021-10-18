@@ -38,7 +38,7 @@ function UpdateTrainsForm(props) {
         <Dropdown
           className="dropdown-trains"
           onChange={handleDropDownSelect}
-          placeholder="State"
+          placeholder="Valitse juna"
           search
           selection
           options={props.allTrains}

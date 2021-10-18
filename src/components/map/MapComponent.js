@@ -90,7 +90,7 @@ function SingleTrainMarker(props) {
       <Popup autoPan={false}>
         Operaattori: {_.toUpper(props.trainInfo.operatorShortCode)} <br />
         Juna: {props.trainInfo.trainType} {props.train} <br />
-        Nopeus: {props.currentSpeed} <br />
+        Nopeus: {props.currentSpeed} km/h<br />
         Liikkeessä: {props.trainInfo.runningCurrently} <br />
       </Popup>
     </Marker>
