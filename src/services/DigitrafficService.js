@@ -1,6 +1,13 @@
 import axios from "axios";
 import moment from 'moment';
 
+
+//TODO:
+//Tänne voisi tehdä haun asemille: https://rata.digitraffic.fi/api/v1/metadata/stations
+//Train trackingilla edellinen ja seuraava asema:
+//Kaikki junat: https://rata.digitraffic.fi/api/v1/train-tracking?version=65403053026
+//Yksi juna: https://rata.digitraffic.fi/api/v1/train-tracking/2021-10-19/73?version=1000
+//Timetablet löytyy täältä: https://rata.digitraffic.fi/api/v1/trains/latest/10457
 const DigitrafficService = {
     getLatestCoordinate: function(value) {
         var url = "https://rata.digitraffic.fi/api/v1/train-locations/latest/" + value;

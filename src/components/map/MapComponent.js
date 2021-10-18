@@ -22,61 +22,6 @@ import { bindActionCreators } from "redux";
 import { Icon } from "leaflet";
 import { connect } from "react-redux";
 
-/*
-const baseLayers = [
-  {
-    name: "Mapnik",
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    default: false,
-  },
-  {
-    name: "BlackAndWhite",
-    url: "https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png",
-    default: false,
-  },
-  {
-    name: "Toner",
-    url: "http://stamen-tiles-{s}.a.ssl.fastly.net/toner-background/{z}/{x}/{y}.png",
-    default: false,
-  },
-  {
-    name: "Light all",
-    url: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
-    default: false,
-  },
-  {
-    name: "Dark all",
-    url: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png",
-    default: true,
-  },
-];
-
-//TODO: Karttatasot omaan funktioon 
-//(testi, checked tieto ei päivity oikein loopatessa)
-function MapLayersControlTest() {
-  const listItems = baseLayers.map((layer) => (
-    <LayersControl.BaseLayer key={"base" + layer.name} name={layer.name}>
-      <TileLayer
-        key={layer.name}
-        checked
-        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        url={layer.url}
-      />
-    </LayersControl.BaseLayer>
-  ));
-  return (
-    <LayersControl>
-      {listItems}
-      <LayersControl.Overlay checked name="Raide-taso">
-        <TileLayer
-          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png"
-        />
-      </LayersControl.Overlay>
-    </LayersControl>
-  );
-}
-*/
 
 //Karttatasot omaan funktioon
 function MapLayersControl() {
@@ -152,28 +97,13 @@ function SingleTrainMarker(props) {
   );
 }
 
-
-function MultipleTrainMarker(props) {
-    return (<Marker position={[props.coordinates[1], props.coordinates[0]]} icon={new Icon({
-              iconUrl: markerTrainIconPng,
-              iconSize: [25, 41],
-              iconAnchor: [12, 41]
-            })}>
-          <Popup key={props.index} autoPan={false}>
-            Juna: {props.item.trainNumber} <br />
-            Nopeus: {props.item.speed} <br />
-          </Popup>
-        </Marker>);
-}
-
-
 class MapComponent extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       train: 0,
-      delay: 4000,
+      delay: 5000,
       coordinates: [62.24147, 25.72088],
       allCoordinates: [],
       zoom: 13,
@@ -219,14 +149,15 @@ class MapComponent extends Component {
     });
   }
 
+  getCorrectCoordinates(coordinates) {
+    return [coordinates[1], coordinates[0]];
+  }
+
   tick = () => {
     DigitrafficService.getLatestCoordinate(this.state.train)
       .then((data) => {
         if (data && data.length > 0) {
-          let coordinate = [
-            data[0].location.coordinates[1],
-            data[0].location.coordinates[0],
-          ];
+          let coordinate = this.getCorrectCoordinates(data[0].location.coordinates);
           this.setState({
             coordinates: coordinate,
             currentSpeed: data[0].speed,
@@ -254,39 +185,53 @@ class MapComponent extends Component {
       });
   };
 
-  getTrainInfo = () => {
+  getTrainInfo = (item) => {
     let info = {
       operatorShortCode: "",
       trainType: "",
       runningCurrently: "",
     };
-    if (this.state.trainInfo && this.state.trainInfo.length > 0) {
+    if ((this.hasSingleTrainSelected() || this.hasAllTrainsSelected()) && item) {
       info = {
-        operatorShortCode: this.state.trainInfo[0].operatorShortCode,
-        trainType: this.state.trainInfo[0].trainType,
-        runningCurrently: this.state.trainInfo[0].runningCurrently
-          ? "Kyllä"
-          : "Ei",
+        operatorShortCode: item.operatorShortCode,
+        trainType: item.trainType,
+        runningCurrently: item.runningCurrently ? "Kyllä" : "Ei",
       };
     }
     return info;
   };
 
+  hasSingleTrainSelected() {
+    return !this.state.allTrainsSelected && this.state.trainInfo && this.state.trainInfo.length > 0;
+  }
+
+  hasAllTrainsSelected() {
+    return this.state.allTrainsSelected && this.props.allTrainInfoToday && this.props.allTrainInfoToday.length > 0;
+  }
+
   render() {
+    let trainInfo = {};
     let currentZoom = this.state.zoom;
-    let trainInfo = this.getTrainInfo();
+    
 
     let showAllTrains = <div></div>;
     let changeView = <div></div> 
 
     //Kartan markkereiden asettaminen (kaikki junat vs yksittäinen)
     if (this.state.allTrains && this.state.allTrainsSelected) {
-      showAllTrains = this.state.allTrains.map((item, index) => (
-        <MultipleTrainMarker key={index} coordinates={item.location.coordinates} item={item} index={index}></MultipleTrainMarker>
-      ));
+      showAllTrains = this.state.allTrains.map((item, index) => {
+        let foundTrain = _.find(this.props.allTrainInfoToday, {trainNumber: item.trainNumber});
+        let coordinates = this.getCorrectCoordinates(item.location.coordinates);
+        trainInfo = this.getTrainInfo(foundTrain);
+        return <SingleTrainMarker key={index} currentSpeed={item.speed} 
+                train={item.trainNumber} trainInfo={trainInfo} 
+                coordinates={coordinates} item={item} 
+                index={index}></SingleTrainMarker>
+      });
     } else {
+      trainInfo = this.getTrainInfo(this.state.trainInfo[0]);
       showAllTrains = <SingleTrainMarker coordinates={this.state.coordinates} train={this.state.train} 
-                      currentSpeed={this.state.currentSpeed} trainInfo={trainInfo}></SingleTrainMarker>
+        currentSpeed={this.state.currentSpeed} trainInfo={trainInfo}></SingleTrainMarker>
     }
 
     //Kohdista kartta jos vain yksitäinen juna näkyvissä

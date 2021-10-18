@@ -19,7 +19,7 @@ function TrainSlider() {
     console.log(event.target.checked)
   }
   return (
-    <div class="ui slider checkbox">
+    <div className="ui slider checkbox">
       <input onChange={handleCheckBoxSelect} type="checkbox" name="newsletter" />
       <label>Näytä kaikki junat kartalla</label>
     </div>
@@ -27,7 +27,6 @@ function TrainSlider() {
 }
 
 function UpdateTrainsForm(props) {
-  //const trainId = useSelector((state) => state.train.train);
   const dispatch = useDispatch();
   function handleDropDownSelect(event, data) {
     getLatestCoordinatForTrain(data.value, dispatch);

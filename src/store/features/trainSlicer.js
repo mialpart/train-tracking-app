@@ -6,7 +6,7 @@ export const trainSlice = createSlice({
   initialState: {
     train: 0,
     pollingCount: 0,
-    delay: 4000,
+    delay: 5000,
     coordinates: [62.24147, 25.72088],
     allCoordinates: [],
     allTrains: [],
