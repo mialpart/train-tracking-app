@@ -12,9 +12,11 @@ function RouterComponent() {
     <Router>
       <NavBar />
       <Route path="/" exact render={() => <MapView />} />
-      <Route path="/home" exact render={() => <MapView />} />
+      <Route path="/map" exact render={() => <MapView />} />
+      {/*
+        Toistaiseksi piiloon
       <Route path="/about" exact render={() => <About />} />
-      <Route path="/profile" exact render={() => <Profile />} />
+      <Route path="/profile" exact render={() => <Profile />} />*/}
     </Router>
   );
 }

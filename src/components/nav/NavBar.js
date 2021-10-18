@@ -6,7 +6,7 @@ import trainImage from './../../assets/images/train-tunnel.svg';
 import './NavBar.css';
 
 export default class NavBar extends Component {
-  state = { activeItem: 'home' }
+  state = { activeItem: 'map' }
 
   handleItemClick = (e, { name }) => {
     this.setState({ activeItem: name })
@@ -20,11 +20,12 @@ export default class NavBar extends Component {
         <Menu pointing secondary inverted color='red' key='red' className='nav-bar'>
           <img alt="train" src={trainImage}></img>
           <Menu.Item className='menu-item'
-            as={NavLink} to="/home"
-            name='home'
-            active={activeItem === 'home'}
+            as={NavLink} to="/map"
+            name='Kartta'
+            active={activeItem === 'map'}
             onClick={this.handleItemClick}
           />
+          {/* Toistaiseksi piiloon           
           <Menu.Item className='menu-item'
             as={NavLink} to="/about"
             name='about'
@@ -37,6 +38,8 @@ export default class NavBar extends Component {
             active={activeItem === 'profile'}
             onClick={this.handleItemClick}
           />
+          */}
+
         </Menu>
       </div>
     )

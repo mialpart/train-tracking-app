@@ -1,11 +1,11 @@
 #mapid { 
   height: 180px; 
-  margin: 30px;
+  margin: 30px 60px;
 }
 
 .leaflet-container {
   width: 100wh; 
-  height: 75vh;
+  height: 70vh;
 }
 
 .leaflet-popup {

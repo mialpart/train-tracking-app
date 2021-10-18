@@ -86,14 +86,14 @@ class MapView extends Component {
     let allTrains = this.getAllDropDownTrains();
     return (
       <div>
-        <h2>PollingCount: {this.state.pollingCount}</h2>
+        {/*<h2>PollingCount: {this.state.pollingCount}</h2>*/}
         <div>
           <UpdateTrainsForm
             name={"Päivitä junalistaus"}
             allTrains={allTrains}
           ></UpdateTrainsForm>
         </div>
-        <MapComponent allTrains={this.state.allTrains}></MapComponent>
+        <MapComponent allTrains={this.state.allTrains} allTrainInfoToday={this.state.allTrainInfoToday}></MapComponent>
       </div>
     );
   }
