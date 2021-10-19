@@ -4,26 +4,23 @@ import { createSlice } from "@reduxjs/toolkit";
 export const trainSlice = createSlice({
   name: "train",
   initialState: {
-    train: 0,
     pollingCount: 0,
     delay: 5000,
-    coordinates: [62.24147, 25.72088],
     allCoordinates: [],
     allTrains: [],
     zoom: 13,
     trainInfo: [],
     allTrainInfoToday: [],
     allTrainsSelected: false,
-    trackTheTrain: false
+    trackTheTrain: false,
+    currentTrain: {}
   },
   reducers: {
-    updateTrain: (state, action) => {
-      // Redux Toolkit allows us to write "mutating" logic in reducers. It
-      // doesn't actually mutate the state because it uses the Immer library,
-      // which detects changes to a "draft state" and produces a brand new
-      // immutable state based off those changes
-      state.train = action.payload.trainNumber;
-      state.coordinates = action.payload.coordinates;
+    //Trainnumber
+    updateCurrentTrain: (state, action) => {
+      console.log("Juna päivittyy");
+      console.log(action.payload);
+      state.currentTrain = action.payload;
     },
     //Kaikkien junien koordinaatit
     updateAllTrains: (state, action) => {
@@ -55,14 +52,14 @@ export const trainSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const {
-  updateTrain,
   updateAllTrains,
   updatePollingCount,
   updateTrainInfo,
   updateAllTrainInfoToday,
   updateAllTrainCoordinates,
   isAllTrainsSelected,
-  trackTheTrain
+  trackTheTrain,
+  updateCurrentTrain
 } = trainSlice.actions;
 
 export default trainSlice.reducer;

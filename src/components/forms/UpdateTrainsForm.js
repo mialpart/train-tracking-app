@@ -7,10 +7,10 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import {
   updateAllTrains,
-  updateTrain,
   updateTrainInfo,
   isAllTrainsSelected,
-  trackTheTrain
+  trackTheTrain,
+  updateCurrentTrain
 } from "../../store/features/trainSlicer";
 
 function TrainSlider() {
@@ -84,9 +84,7 @@ function getLatestCoordinatForTrain(trainNumber, dispatch) {
           data[0].location.coordinates[1],
           data[0].location.coordinates[0],
         ];
-        dispatch(
-          updateTrain({ coordinates: coordinate, trainNumber: trainNumber })
-        );
+        dispatch(updateCurrentTrain(data[0]));
         if (store.getState().train.allTrains.length === 0) {
           storeAllTrains(dispatch);
         }

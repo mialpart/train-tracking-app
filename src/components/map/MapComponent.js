@@ -14,8 +14,8 @@ import markerTrainIconPng from "./../../assets/images/train-tunnel-blue.svg"; //
 import DigitrafficService from "./../../services/DigitrafficService";
 import {
   updatePollingCount,
-  updateTrain,
-  updateAllTrains
+  updateAllTrains,
+  updateCurrentTrain
 } from "../../store/features/trainSlicer";
 import { Component } from "react";
 import { bindActionCreators } from "redux";
@@ -89,8 +89,8 @@ function SingleTrainMarker(props) {
     >
       <Popup autoPan={false}>
         Operaattori: {_.toUpper(props.trainInfo.operatorShortCode)} <br />
-        Juna: {props.trainInfo.trainType} {props.train} <br />
-        Nopeus: {props.currentSpeed} km/h<br />
+        Juna: {props.trainInfo.trainType} {props.trainInfo.trainNumber} <br />
+        Nopeus: {props.trainInfo.speed} km/h<br />
         Liikkeessä: {props.trainInfo.runningCurrently} <br />
       </Popup>
     </Marker>
@@ -102,7 +102,6 @@ class MapComponent extends Component {
     super(props);
 
     this.state = {
-      train: 0,
       delay: 5000,
       coordinates: [62.24147, 25.72088],
       allCoordinates: [],
@@ -111,7 +110,8 @@ class MapComponent extends Component {
       trainInfo: [],
       allTrains: [],
       allTrainsSelected: false,
-      trackTheTrain: false
+      trackTheTrain: false,
+      currentTrain: {}
     };
 
     store.subscribe(() => {
@@ -120,15 +120,15 @@ class MapComponent extends Component {
       // with new data.
       
       this.setState({
-        train: store.getState().train.train,
         delay: store.getState().train.delay,
-        coordinates: store.getState().train.coordinates,
         allCoordinates: store.getState().train.allCoordinates,
         zoom: store.getState().train.zoom,
         trainInfo: store.getState().train.trainInfo,
         allTrains: store.getState().train.allTrains,
         allTrainsSelected: store.getState().train.allTrainsSelected,
-        trackTheTrain: store.getState().train.trackTheTrain
+        trackTheTrain: store.getState().train.trackTheTrain,
+        currentTrain: store.getState().train.currentTrain,
+        coordinates: this.getCorrectCoordinates(store.getState().train.currentTrain.location.coordinates)
       });
     });
   }
@@ -165,20 +165,17 @@ class MapComponent extends Component {
   }
 
   tick = () => {
-    DigitrafficService.getLatestCoordinate(this.state.train)
+    DigitrafficService.getLatestCoordinate(this.state.currentTrain.trainNumber)
       .then((data) => {
         if (data && data.length > 0) {
           let coordinate = this.getCorrectCoordinates(data[0].location.coordinates);
           this.setState({
             coordinates: coordinate,
-            currentSpeed: data[0].speed,
+            currentTrain: data[0]
           });
           //mapStateToProps ja mapDispatchToProps tarvitaan että data päivittyy kunnolla
           this.props.updatePollingCount();
-          this.props.updateTrain({
-            trainNumber: data[0].trainNumber,
-            coordinates: coordinate,
-          });
+          this.props.updateCurrentTrain(data[0]);
         }
       })
       .catch((error) => {
@@ -196,17 +193,21 @@ class MapComponent extends Component {
       });
   };
 
-  getTrainInfo = (item) => {
+  getTrainInfo = (trainInfo, currentTrain) => {
     let info = {
+      trainNumber: 0,
       operatorShortCode: "",
       trainType: "",
       runningCurrently: "",
+      speed: 0
     };
-    if ((this.hasSingleTrainSelected() || this.hasAllTrainsSelected()) && item) {
+    if ((this.hasSingleTrainSelected() || this.hasAllTrainsSelected()) && trainInfo) {
       info = {
-        operatorShortCode: item.operatorShortCode,
-        trainType: item.trainType,
-        runningCurrently: item.runningCurrently ? "Kyllä" : "Ei",
+        trainNumber: currentTrain.trainNumber,
+        operatorShortCode: trainInfo.operatorShortCode,
+        trainType: trainInfo.trainType,
+        runningCurrently: trainInfo.runningCurrently ? "Kyllä" : "Ei",
+        speed: currentTrain ? currentTrain.speed : 0 
       };
     }
     return info;
@@ -220,29 +221,30 @@ class MapComponent extends Component {
     return this.state.allTrainsSelected && this.props.allTrainInfoToday && this.props.allTrainInfoToday.length > 0;
   }
 
+  hasCurrentTrain() {
+    return !_.isEmpty(this.state.currentTrain);
+  }
+
   render() {
     let trainInfo = {};
     let currentZoom = this.state.zoom;
-    
-
     let showAllTrains = <div></div>;
     let changeView = <div></div> 
 
     //Kartan markkereiden asettaminen (kaikki junat vs yksittäinen)
     if (this.state.allTrains && this.state.allTrainsSelected) {
-      showAllTrains = this.state.allTrains.map((item, index) => {
+        showAllTrains = this.state.allTrains.map((item, index) => {
         let foundTrain = _.find(this.props.allTrainInfoToday, {trainNumber: item.trainNumber});
         let coordinates = this.getCorrectCoordinates(item.location.coordinates);
         trainInfo = this.getTrainInfo(foundTrain);
-        return <SingleTrainMarker key={index} currentSpeed={item.speed} 
-                train={item.trainNumber} trainInfo={trainInfo} 
-                coordinates={coordinates} item={item} 
-                index={index}></SingleTrainMarker>
+        return <SingleTrainMarker key={index} train={item.trainNumber} trainInfo={trainInfo} 
+                coordinates={coordinates}></SingleTrainMarker>
       });
     } else {
-      trainInfo = this.getTrainInfo(this.state.trainInfo[0]);
-      showAllTrains = <SingleTrainMarker coordinates={this.state.coordinates} train={this.state.train} 
-        currentSpeed={this.state.currentSpeed} trainInfo={trainInfo}></SingleTrainMarker>
+        trainInfo = this.getTrainInfo(this.state.trainInfo[0], this.state.currentTrain);
+        let coordinates = this.state.coordinates; 
+        showAllTrains = <SingleTrainMarker coordinates={coordinates} train={this.state.train} 
+                trainInfo={trainInfo}></SingleTrainMarker>
     }
 
     //Kohdista kartta jos vain yksitäinen juna näkyvissä
@@ -286,8 +288,8 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       updatePollingCount: updatePollingCount,
-      updateTrain: updateTrain,
       updateAllTrains: updateAllTrains,
+      updateCurrentTrain: updateCurrentTrain
     },
     dispatch
   );
