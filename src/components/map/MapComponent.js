@@ -21,6 +21,7 @@ import { Component } from "react";
 import { bindActionCreators } from "redux";
 import { Icon } from "leaflet";
 import { connect } from "react-redux";
+import stations from "./../../assets/metadata/stations.json";
 
 
 //Karttatasot omaan funktioon
@@ -88,10 +89,12 @@ function SingleTrainMarker(props) {
       }
     >
       <Popup autoPan={false}>
-        Operaattori: {_.toUpper(props.trainInfo.operatorShortCode)} <br />
-        Juna: {props.trainInfo.trainType} {props.trainInfo.trainNumber} <br />
-        Nopeus: {props.trainInfo.speed} km/h<br />
-        Liikkeessä: {props.trainInfo.runningCurrently} <br />
+        <b>Operaattori: </b> {_.toUpper(props.trainInfo.operatorShortCode)} <br />
+        <b>Juna: </b>{props.trainInfo.trainType} {props.trainInfo.trainNumber} <br />
+        {/* <b>Lähtöasema:</b> {props.trainInfo.departure} <br /> TODO: Hae asematiedot meta-filestä // jostain keksittävä lähimmän ajan haku -> seuraavan aseman tiedot
+        <b>Pääteasema:</b> {props.trainInfo.arrival} <br /><br /> */}
+        <b>Nopeus:</b> {props.trainInfo.speed} km/h<br />
+        <b>Liikkeessä:</b> {props.trainInfo.runningCurrently} <br />
       </Popup>
     </Marker>
   );
@@ -199,19 +202,46 @@ class MapComponent extends Component {
       operatorShortCode: "",
       trainType: "",
       runningCurrently: "",
-      speed: 0
+      speed: 0,
+      liveEstimateTime: "",
+      scheduledTime: "",
+      arrival: "",
+      departure: "",
     };
+    
+    let nextArrivalInfo = this.getTimeTableInfo("ARRIVAL", trainInfo);
+    let nextDepartureInfo = this.getTimeTableInfo("DEPARTURE", trainInfo);
+    
     if ((this.hasSingleTrainSelected() || this.hasAllTrainsSelected()) && trainInfo) {
       info = {
         trainNumber: currentTrain.trainNumber,
         operatorShortCode: trainInfo.operatorShortCode,
         trainType: trainInfo.trainType,
         runningCurrently: trainInfo.runningCurrently ? "Kyllä" : "Ei",
-        speed: currentTrain ? currentTrain.speed : 0 
+        speed: currentTrain ? currentTrain.speed : 0,
+        liveEstimateTime: "",
+        scheduledTime: "",
+        departure: nextDepartureInfo ? this.getStationName(nextDepartureInfo.stationShortCode) : "",
+        arrival: nextArrivalInfo ? this.getStationName(nextArrivalInfo.stationShortCode) : "",
       };
     }
     return info;
   };
+
+  getStationName(stationShortCode) {
+    return stations.find(station => {return station.stationShortCode === stationShortCode;}).stationName;
+  }
+
+  getTimeTableInfo(type, trainInfo) {
+    if(trainInfo) {
+      let filteredTimeTableInfo = trainInfo.timeTableRows.filter(row => {
+        return row.type === type;
+      });
+      return _.last(filteredTimeTableInfo);
+    } else {
+      return null;
+    }
+  }
 
   hasSingleTrainSelected() {
     return !this.state.allTrainsSelected && this.state.trainInfo && this.state.trainInfo.length > 0;
