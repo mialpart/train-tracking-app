@@ -13,6 +13,11 @@ Asenna paketit komennolla:
 Aja sovellusta komennolla:
 ```npm start```
 
+Livedemo:
+```https://master.dovmcr7k7doh1.amplifyapp.com/```
+
+HOX! Kehitteillä
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
