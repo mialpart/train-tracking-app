@@ -128,7 +128,7 @@ class MapComponent extends Component {
         allTrainsSelected: store.getState().train.allTrainsSelected,
         trackTheTrain: store.getState().train.trackTheTrain,
         currentTrain: store.getState().train.currentTrain,
-        coordinates: this.getCorrectCoordinates(store.getState().train.currentTrain.location.coordinates)
+        coordinates: this.hasCurrentTrain(store.getState().train.currentTrain) ? this.getCorrectCoordinates(store.getState().train.currentTrain.location.coordinates) : [62.24147, 25.72088]
       });
     });
   }
@@ -236,7 +236,7 @@ class MapComponent extends Component {
         showAllTrains = this.state.allTrains.map((item, index) => {
         let foundTrain = _.find(this.props.allTrainInfoToday, {trainNumber: item.trainNumber});
         let coordinates = this.getCorrectCoordinates(item.location.coordinates);
-        trainInfo = this.getTrainInfo(foundTrain);
+        trainInfo = this.getTrainInfo(foundTrain, item);
         return <SingleTrainMarker key={index} train={item.trainNumber} trainInfo={trainInfo} 
                 coordinates={coordinates}></SingleTrainMarker>
       });

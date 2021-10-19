@@ -1,5 +1,6 @@
 import "./Form.css";
 import store from "../../store/train";
+import _ from "lodash";
 import { Button, Dropdown } from "semantic-ui-react";
 import { useDispatch } from "react-redux";
 import DigitrafficService from "../../services/DigitrafficService";
@@ -17,6 +18,8 @@ function TrainSlider() {
   const dispatch = useDispatch();
   function handleCheckBoxSelect(event, data) {
     dispatch(isAllTrainsSelected(event.target.checked));
+    storeAllTrains(dispatch);
+
     console.log(event.target.checked)
   }
   return (
@@ -47,6 +50,7 @@ function UpdateTrainsForm(props) {
     getLatestCoordinatForTrain(data.value, dispatch);
     getLatestInfoForTrain(data.value, dispatch);
   }
+  let uniqTrains = _.uniqBy(props.allTrains, 'key');
   return (
     <div>
       <div>
@@ -56,7 +60,7 @@ function UpdateTrainsForm(props) {
           placeholder="Valitse juna"
           search
           selection
-          options={props.allTrains}
+          options={uniqTrains}
         />
         <TrainSlider ></TrainSlider>
         <TrackTrainSlider></TrackTrainSlider>
@@ -122,6 +126,7 @@ function storeAllTrains(dispatch) {
       console.log(error);
     });
 }
+
 function mapDispatchToProps(dispatch) {
   return bindActionCreators({}, dispatch);
 }
