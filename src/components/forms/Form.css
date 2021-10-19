@@ -5,3 +5,17 @@
 .slider {
   margin-left: 30px;
 }
+
+/*
+.ui.slider.checkbox input:checked~.box:before, 
+.ui.slider.checkbox input:checked~label:before {
+  background-color: #549957!important;
+  color: #549957 !important;
+}
+
+.ui.slider.checkbox input:checked~.box, 
+.ui.slider.checkbox input:checked~label {
+  opacity: 1;
+  color: #549957 !important;
+} 
+*/

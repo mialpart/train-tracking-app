@@ -9,7 +9,8 @@ import {
   updateAllTrains,
   updateTrain,
   updateTrainInfo,
-  isAllTrainsSelected
+  isAllTrainsSelected,
+  trackTheTrain
 } from "../../store/features/trainSlicer";
 
 function TrainSlider() {
@@ -22,6 +23,20 @@ function TrainSlider() {
     <div className="ui slider checkbox">
       <input onChange={handleCheckBoxSelect} type="checkbox" name="newsletter" />
       <label>Näytä kaikki junat kartalla</label>
+    </div>
+  );
+}
+
+function TrackTrainSlider() {
+  const dispatch = useDispatch();
+  function handleCheckBoxSelect(event, data) {
+    dispatch(trackTheTrain(event.target.checked));
+    console.log(event.target.checked)
+  }
+  return (
+    <div className="ui slider checkbox">
+      <input onChange={handleCheckBoxSelect} type="checkbox" name="newsletter" />
+      <label>Seuraa junaa</label>
     </div>
   );
 }
@@ -44,6 +59,7 @@ function UpdateTrainsForm(props) {
           options={props.allTrains}
         />
         <TrainSlider ></TrainSlider>
+        <TrackTrainSlider></TrackTrainSlider>
       </div>
       <div className="btn-update">
         <Button
@@ -113,6 +129,8 @@ function mapDispatchToProps(dispatch) {
 }
 
 function mapStateToProps(state) {
-  return {};
+  return {
+    trackTheTrain: state.trackTheTrain
+  };
 }
 export default connect(mapStateToProps, mapDispatchToProps)(UpdateTrainsForm);

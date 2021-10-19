@@ -15,7 +15,7 @@ import DigitrafficService from "./../../services/DigitrafficService";
 import {
   updatePollingCount,
   updateTrain,
-  updateAllTrains,
+  updateAllTrains
 } from "../../store/features/trainSlicer";
 import { Component } from "react";
 import { bindActionCreators } from "redux";
@@ -110,13 +110,15 @@ class MapComponent extends Component {
       speed: 0,
       trainInfo: [],
       allTrains: [],
-      allTrainsSelected: false
+      allTrainsSelected: false,
+      trackTheTrain: false
     };
 
     store.subscribe(() => {
       // When state will be updated(in our case, when items will be fetched),
       // we will update local component state and force component to rerender
       // with new data.
+      
       this.setState({
         train: store.getState().train.train,
         delay: store.getState().train.delay,
@@ -125,7 +127,8 @@ class MapComponent extends Component {
         zoom: store.getState().train.zoom,
         trainInfo: store.getState().train.trainInfo,
         allTrains: store.getState().train.allTrains,
-        allTrainsSelected: store.getState().train.allTrainsSelected
+        allTrainsSelected: store.getState().train.allTrainsSelected,
+        trackTheTrain: store.getState().train.trackTheTrain
       });
     });
   }
@@ -133,12 +136,11 @@ class MapComponent extends Component {
   componentDidMount() {
     this.interval = setInterval(this.tick, this.state.delay);
   }
+
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.delay !== this.state.delay) {
-      clearInterval(this.interval);
-      this.interval = setInterval(this.tick, this.state.delay);
-    }
+    this.doTrackTheTrain(prevState);
   }
+
   componentWillUnmount() {
     clearInterval(this.interval);
   }
@@ -151,6 +153,15 @@ class MapComponent extends Component {
 
   getCorrectCoordinates(coordinates) {
     return [coordinates[1], coordinates[0]];
+  }
+
+  doTrackTheTrain(prevState) {
+    if(this.state.trackTheTrain) {
+      clearInterval(this.interval);
+      this.interval = setInterval(this.tick, this.state.delay);
+    } else if (!this.state.trackTheTrain) {
+      clearInterval(this.interval);
+    }
   }
 
   tick = () => {
@@ -285,6 +296,7 @@ function mapDispatchToProps(dispatch) {
 function mapStateToProps(state) {
   return {
     pollingCount: state.pollingCount,
+    trackTheTrain: state.trackTheTrain
   };
 }
 export default connect(mapStateToProps, mapDispatchToProps)(MapComponent);
