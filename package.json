@@ -27,6 +27,20 @@
     "semantic-ui-react": "^2.0.4",
     "web-vitals": "^1.1.2"
   },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ],
+    "plugins": [
+      [
+        "@babel/plugin-proposal-decorators",
+        {
+          "legacy": true
+        }
+      ]
+    ]
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "babel src/ -d lib/",
@@ -45,8 +59,5 @@
     ">0.2%",
     "not dead",
     "not op_mini all"
-  ],
-  "devDependencies": {
-    "flow-bin": "^0.162.0"
-  }
+  ]
 }

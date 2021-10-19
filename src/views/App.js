@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Route } from "react-router-dom";
 import Profile from "./profile/Profile";
 import About from "./about/About";
 import MapView from "./../views/map/MapView";
-//import Button from './../components/buttons/Button';
 import NavBar from "./../components/nav/NavBar";
 
 import "./App.css";
