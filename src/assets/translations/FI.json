@@ -1,0 +1,10 @@
+{
+    "Welcome to React": "Teretulloo",
+    "map": "Kartta",
+    "update-train-list": "Päivitä junalistaus",
+    "track-the-train": "Seuraa junaa",
+    "show-all-trains": "Näytä kaikki junat kartalla",
+    "select-train": "Valitse juna",
+    "update-trains-popup-text": "Päivittää junien lokaatiot 5 sekunnin välein.",
+    "follow-train": "Seuraa junaa"
+  }

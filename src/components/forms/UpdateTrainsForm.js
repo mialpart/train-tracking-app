@@ -1,10 +1,11 @@
 import "./Form.css";
 import store from "../../store/train";
 import _ from "lodash";
-import { Button, Dropdown, Icon, Popup } from "semantic-ui-react";
+import { Button, Dropdown, Popup } from "semantic-ui-react";
 import { useDispatch } from "react-redux";
 import DigitrafficService from "../../services/DigitrafficService";
 import { bindActionCreators } from "redux";
+import { withTranslation, useTranslation } from 'react-i18next';
 import { connect } from "react-redux";
 import {
   updateAllTrains,
@@ -15,22 +16,22 @@ import {
 } from "../../store/features/trainSlicer";
 
 function TrainSlider() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   function handleCheckBoxSelect(event, data) {
     dispatch(isAllTrainsSelected(event.target.checked));
     storeAllTrains(dispatch);
-
-    console.log(event.target.checked)
   }
   return (
     <div className="ui slider checkbox form-item">
       <input onChange={handleCheckBoxSelect} type="checkbox" name="newsletter" />
-      <label>Näytä kaikki junat kartalla</label>
+      <label>{t('show-all-trains')}</label>
     </div>
   );
 }
 
 function TrackTrainSlider() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   function handleCheckBoxSelect(event, data) {
     dispatch(trackTheTrain(event.target.checked));
@@ -39,13 +40,14 @@ function TrackTrainSlider() {
   return (
     <div className="ui slider checkbox form-item">
       <input onChange={handleCheckBoxSelect} type="checkbox" name="newsletter" />
-      <label>Seuraa junaa </label>
-      <Popup inverted content='Päivittää junien lokaatiot 5 sekunnin välein.' trigger={<i className='info circle icon red'></i>} />
+      <label>{t('track-the-train')}</label>
+      <Popup inverted content={t('update-trains-popup-text')} trigger={<i className='info circle icon red'></i>} />
     </div>
   );
 }
 
 function UpdateTrainsForm(props) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   function handleDropDownSelect(event, data) {
     getLatestCoordinatForTrain(data.value, dispatch);
@@ -60,7 +62,7 @@ function UpdateTrainsForm(props) {
             <Dropdown
               className="dropdown-trains form-item"
               onChange={handleDropDownSelect}
-              placeholder="Valitse juna"
+              placeholder={t('select-train')}
               search
               selection
               options={uniqTrains}
@@ -92,10 +94,6 @@ function getLatestCoordinatForTrain(trainNumber, dispatch) {
   DigitrafficService.getLatestCoordinate(trainNumber)
     .then((data) => {
       if (data && data.length > 0) {
-        let coordinate = [
-          data[0].location.coordinates[1],
-          data[0].location.coordinates[0],
-        ];
         dispatch(updateCurrentTrain(data[0]));
         if (store.getState().train.allTrains.length === 0) {
           storeAllTrains(dispatch);
@@ -144,4 +142,4 @@ function mapStateToProps(state) {
     trackTheTrain: state.trackTheTrain
   };
 }
-export default connect(mapStateToProps, mapDispatchToProps)(UpdateTrainsForm);
+export default (connect(mapStateToProps, mapDispatchToProps), withTranslation())(UpdateTrainsForm);

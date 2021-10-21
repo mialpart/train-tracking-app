@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Route } from "react-router-dom";
-import Profile from "./profile/Profile";
-import About from "./about/About";
 import MapView from "./../views/map/MapView";
 import NavBar from "./../components/nav/NavBar";
+import { Localization } from "../utils/i18n-helper";
 
+import { connect } from "react-redux";
 import "./App.css";
 
 function RouterComponent() {
@@ -23,10 +23,19 @@ function RouterComponent() {
 function App() {
   return (
     <div className="App">
+      <h2>{Localization('Welcome to React')}</h2>
       <RouterComponent></RouterComponent>
-      <h1>FOOTER</h1>
     </div>
   );
 }
 
-export default App;
+
+function mapStateToProps(state) {
+  return {
+    language: state.language
+  };
+}
+
+export default connect(mapStateToProps)(App);
+
+//export default App;

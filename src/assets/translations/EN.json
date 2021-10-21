@@ -1,0 +1,11 @@
+{
+    "Welcome to React": "Welcome to React and react-i18next",
+    "map": "Map",
+    "update-train-list": "Update train list",
+    "track-the-train": "Track the train",
+    "show-all-trains": "Show all trains",
+    "select-train": "Select train",
+    "update-trains-popup-text": "Updates train locations every 5 seconds.",
+    "follow-train": "Follow train"
+
+  }

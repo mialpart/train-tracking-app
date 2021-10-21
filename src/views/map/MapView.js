@@ -7,6 +7,7 @@ import UpdateTrainsForm from "./../../components/forms/UpdateTrainsForm";
 import "./MapView.css";
 import "leaflet/dist/leaflet.css";
 import { connect } from "react-redux";
+import { withTranslation } from "react-i18next";
 
 
 class MapView extends Component {
@@ -84,12 +85,13 @@ class MapView extends Component {
 
   render() {
     let allTrains = this.getAllDropDownTrains();
+    const { t } = this.props;
     return (
       <div>
         {/*<h2>PollingCount: {this.state.pollingCount}</h2>*/}
         <div>
           <UpdateTrainsForm
-            name={"Päivitä junalistaus"}
+            name={t('update-train-list')}
             allTrains={allTrains}
           ></UpdateTrainsForm>
         </div>
@@ -105,4 +107,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(MapView);
+export default (connect(mapStateToProps), withTranslation())(MapView);

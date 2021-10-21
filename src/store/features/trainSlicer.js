@@ -4,6 +4,7 @@ import { createSlice } from "@reduxjs/toolkit";
 export const trainSlice = createSlice({
   name: "train",
   initialState: {
+    language: 'FI',
     pollingCount: 0,
     delay: 5000,
     allCoordinates: [],
@@ -16,6 +17,9 @@ export const trainSlice = createSlice({
     currentTrain: {}
   },
   reducers: {
+    updateLanguage: (state, action) => {
+      state.language = action.payload;
+    },
     //Trainnumber
     updateCurrentTrain: (state, action) => {
       console.log("Juna päivittyy");
@@ -59,7 +63,8 @@ export const {
   updateAllTrainCoordinates,
   isAllTrainsSelected,
   trackTheTrain,
-  updateCurrentTrain
+  updateCurrentTrain,
+  updateLanguage
 } = trainSlice.actions;
 
 export default trainSlice.reducer;

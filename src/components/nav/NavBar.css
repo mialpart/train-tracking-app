@@ -5,3 +5,15 @@
 .menu-item {
   height: 100%;
 }
+
+.dropdown-lang {
+  z-index: 100001 !important;
+}
+
+/*
+.ui.selection.dropdown {
+  width: 100px !important;
+  min-width: 100px !important;
+  height: 25px !important;
+}
+*/
