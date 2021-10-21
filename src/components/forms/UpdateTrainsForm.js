@@ -39,7 +39,8 @@ function TrackTrainSlider() {
   return (
     <div className="ui slider checkbox form-item">
       <input onChange={handleCheckBoxSelect} type="checkbox" name="newsletter" />
-      <label>Seuraa junaa <Popup inverted content='Päivittää valitun junan tai kaikkien junien tiedot 5 sekunnin välein.' trigger={<i className='info circle icon red'></i>} /></label>
+      <label>Seuraa junaa </label>
+      <Popup inverted content='Päivittää junien lokaatiot 5 sekunnin välein.' trigger={<i className='info circle icon red'></i>} />
     </div>
   );
 }

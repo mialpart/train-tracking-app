@@ -13,6 +13,7 @@
 .form-item {
   /*width: 150px;*/
   margin: 10px;
+  display: inline-flex !important;
 }
 
 @media screen and (max-width: 650px) {
@@ -22,11 +23,11 @@
   }
 
   .form-item {
-    width: 200px !important;
+    width: 240px !important;
   }
 
   .btn-update button{
-    width: 200px;
+    width: 240px;
     display: contents;
   }
 }
