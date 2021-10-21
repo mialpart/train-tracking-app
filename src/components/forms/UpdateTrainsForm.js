@@ -1,7 +1,7 @@
 import "./Form.css";
 import store from "../../store/train";
 import _ from "lodash";
-import { Button, Dropdown } from "semantic-ui-react";
+import { Button, Dropdown, Icon, Popup } from "semantic-ui-react";
 import { useDispatch } from "react-redux";
 import DigitrafficService from "../../services/DigitrafficService";
 import { bindActionCreators } from "redux";
@@ -23,7 +23,7 @@ function TrainSlider() {
     console.log(event.target.checked)
   }
   return (
-    <div className="ui slider checkbox">
+    <div className="ui slider checkbox form-item">
       <input onChange={handleCheckBoxSelect} type="checkbox" name="newsletter" />
       <label>Näytä kaikki junat kartalla</label>
     </div>
@@ -37,9 +37,9 @@ function TrackTrainSlider() {
     console.log(event.target.checked)
   }
   return (
-    <div className="ui slider checkbox">
+    <div className="ui slider checkbox form-item">
       <input onChange={handleCheckBoxSelect} type="checkbox" name="newsletter" />
-      <label>Seuraa junaa</label>
+      <label>Seuraa junaa <Popup inverted content='Päivittää valitun junan tai kaikkien junien tiedot 5 sekunnin välein.' trigger={<i className='info circle icon red'></i>} /></label>
     </div>
   );
 }
@@ -53,19 +53,25 @@ function UpdateTrainsForm(props) {
   let uniqTrains = _.uniqBy(props.allTrains, 'key');
   return (
     <div>
-      <div>
-        <Dropdown
-          className="dropdown-trains"
-          onChange={handleDropDownSelect}
-          placeholder="Valitse juna"
-          search
-          selection
-          options={uniqTrains}
-        />
-        <TrainSlider ></TrainSlider>
-        <TrackTrainSlider></TrackTrainSlider>
+      <div className="sliders">
+          <div></div>
+          <div>
+            <Dropdown
+              className="dropdown-trains form-item"
+              onChange={handleDropDownSelect}
+              placeholder="Valitse juna"
+              search
+              selection
+              options={uniqTrains}
+            />
+            <TrainSlider></TrainSlider>
+            <TrackTrainSlider ></TrackTrainSlider>
+            
+        </div>
+        <div></div>
       </div>
-      <div className="btn-update">
+      <div className="btn-update btn-grid">
+        <div></div>
         <Button
           aria-label={props.name}
           onClick={() => {
@@ -74,6 +80,7 @@ function UpdateTrainsForm(props) {
         >
           {props.name}
         </Button>
+        <div></div>
       </div>
     </div>
   );

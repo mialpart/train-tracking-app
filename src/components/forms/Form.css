@@ -6,6 +6,56 @@
   margin-left: 30px;
 }
 
+.sliders {
+  display: block;
+}
+
+.form-item {
+  /*width: 150px;*/
+  margin: 10px;
+}
+
+@media screen and (max-width: 650px) {
+  .sliders {
+    display: grid;
+    grid-template-columns: 25% 50% 25%;
+  }
+
+  .form-item {
+    width: 200px !important;
+  }
+
+  .btn-update button{
+    width: 200px;
+    display: contents;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .sliders {
+    display: grid;
+    grid-template-columns: 25% 50% 25%;
+  }
+
+  .btn-grid {
+    display: grid;
+    grid-template-columns: 25% 50% 25%;
+  }
+
+  .form-item {
+    width: 150px !important;
+  }
+
+  .form-item input{
+    width: 150px !important;
+  }
+
+  .btn-update button{
+    width: 200px;
+    display: contents;
+  }
+}
+
 /*
 .ui.slider.checkbox input:checked~.box:before, 
 .ui.slider.checkbox input:checked~label:before {

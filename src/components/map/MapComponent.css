@@ -23,3 +23,15 @@
 .dropdown-trains input {
   z-index: 100000 !important;
 }
+
+@media screen and (max-width: 650px) {
+  #mapid { 
+    height: 150px; 
+    margin: 30px;
+  }
+
+  .leaflet-container {
+    width: 100wh; 
+    height: 60vh;
+  }
+}
