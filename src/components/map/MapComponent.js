@@ -22,6 +22,7 @@ import { bindActionCreators } from "redux";
 import { Icon } from "leaflet";
 import { connect } from "react-redux";
 import stations from "./../../assets/metadata/stations.json";
+import moment from "moment";
 
 
 //Karttatasot omaan funktioon
@@ -91,8 +92,9 @@ function SingleTrainMarker(props) {
       <Popup autoPan={false}>
         <b>Operaattori: </b> {_.toUpper(props.trainInfo.operatorShortCode)} <br />
         <b>Juna: </b>{props.trainInfo.trainType} {props.trainInfo.trainNumber} <br />
-        {/* <b>Lähtöasema:</b> {props.trainInfo.departure} <br /> TODO: Hae asematiedot meta-filestä // jostain keksittävä lähimmän ajan haku -> seuraavan aseman tiedot
-        <b>Pääteasema:</b> {props.trainInfo.arrival} <br /><br /> */}
+        {/*TODO: Hae asematiedot meta-filestä // jostain keksittävä lähimmän ajan haku -> seuraavan aseman tiedot */}
+        <b>Lähtöasema:</b> {props.trainInfo.departure} <br /> 
+        <b>Pääteasema:</b> {props.trainInfo.arrival} <br /><br />
         <b>Nopeus:</b> {props.trainInfo.speed} km/h<br />
         <b>Liikkeessä:</b> {props.trainInfo.runningCurrently} <br />
       </Popup>
@@ -232,12 +234,31 @@ class MapComponent extends Component {
     return stations.find(station => {return station.stationShortCode === stationShortCode;}).stationName;
   }
 
+  getClosestTime(type, trainInfo) {
+    let currentTime = new moment().valueOf();
+    let filteredTimeTableInfo = trainInfo.timeTableRows.filter(row => {
+      let rowTime = new moment(row.scheduledTime).valueOf();
+      return type === "ARRIVAL" ? 
+             row.type === type && currentTime < rowTime :
+             row.type === type && currentTime > rowTime;
+    }).sort(rowItem => {
+      return moment(rowItem.scheduledTime).valueOf();
+    }).find(rowItem => {
+      return type === "ARRIVAL" ? 
+             moment(rowItem.scheduledTime).isAfter(currentTime) : 
+             moment(rowItem.scheduledTime).isBefore(currentTime);
+    });
+    return filteredTimeTableInfo;
+  }
+
   getTimeTableInfo(type, trainInfo) {
     if(trainInfo) {
-      let filteredTimeTableInfo = trainInfo.timeTableRows.filter(row => {
-        return row.type === type;
-      });
-      return _.last(filteredTimeTableInfo);
+      
+      let closestTimeTableInfo = this.getClosestTime(type, trainInfo);
+      if(closestTimeTableInfo) {
+        console.log(closestTimeTableInfo)
+        return closestTimeTableInfo;
+      } else {return null;}
     } else {
       return null;
     }
