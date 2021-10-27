@@ -92,11 +92,7 @@ function SingleTrainMarker(props) {
       }
     >
       <Popup autoPan={false}>
-        <h5>Junan tiedot</h5>
-        <b>Operaattori: </b> {_.toUpper(props.trainInfo.operatorShortCode)}{" "}
-        <br />
-        <b>Juna: </b>
-        {props.trainInfo.trainType} {props.trainInfo.trainNumber} <br /><br />
+        <h5>{_.toUpper(props.trainInfo.operatorShortCode)} - {props.trainInfo.trainType} {props.trainInfo.trainNumber}</h5>
         {/*TODO: Hae asematiedot meta-filestä // jostain keksittävä lähimmän ajan haku -> seuraavan aseman tiedot */}
         
         <b>Lähtöasema:</b> {props.trainInfo.firstDepartureStation} <br />
