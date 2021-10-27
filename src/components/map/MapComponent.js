@@ -92,13 +92,18 @@ function SingleTrainMarker(props) {
       }
     >
       <Popup autoPan={false}>
+        <h5>Junan tiedot</h5>
         <b>Operaattori: </b> {_.toUpper(props.trainInfo.operatorShortCode)}{" "}
         <br />
         <b>Juna: </b>
-        {props.trainInfo.trainType} {props.trainInfo.trainNumber} <br />
+        {props.trainInfo.trainType} {props.trainInfo.trainNumber} <br /><br />
         {/*TODO: Hae asematiedot meta-filestä // jostain keksittävä lähimmän ajan haku -> seuraavan aseman tiedot */}
+        
         <b>Lähtöasema:</b> {props.trainInfo.firstDepartureStation} <br />
-        <b>Pääteasema:</b> {props.trainInfo.lastArrivalStation} <br /><br />
+        <b>Pääteasema:</b> {props.trainInfo.lastArrivalStation} <br />
+        <b>Aikataulu:</b> {props.trainInfo.lastArrivalStationTime} <br />
+        <br />
+
         <b>Edellinen asema:</b> {props.trainInfo.departure} <br />
         <b>Seuraava asema:</b> {props.trainInfo.arrival} <br />
         <b>Aikataulu:</b> {props.trainInfo.scheduledTime} <br />
@@ -250,6 +255,9 @@ class MapComponent extends Component {
           : null,
         lastArrivalStation: lastStation
           ? this.getStationName(lastStation.stationShortCode)
+          : null,
+        lastArrivalStationTime: lastStation
+          ? moment(lastStation.scheduledTime).format("HH:mm:ss")
           : null,
         liveEstimateTime:
           nextArrivalInfo && nextArrivalInfo.liveEstimateTime
