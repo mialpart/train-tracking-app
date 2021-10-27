@@ -15,7 +15,7 @@ import DigitrafficService from "./../../services/DigitrafficService";
 import {
   updatePollingCount,
   updateAllTrains,
-  updateCurrentTrain
+  updateCurrentTrain,
 } from "../../store/features/trainSlicer";
 import { Component } from "react";
 import { bindActionCreators } from "redux";
@@ -23,7 +23,8 @@ import { Icon } from "leaflet";
 import { connect } from "react-redux";
 import stations from "./../../assets/metadata/stations.json";
 import moment from "moment";
-
+import "moment/locale/fi"; // without this line it didn't work
+moment.locale("fi");
 
 //Karttatasot omaan funktioon
 function MapLayersControl() {
@@ -70,7 +71,7 @@ function MapLayersControl() {
   );
 }
 
-//Päivitä kohdistus vain jos yksittäinen juna seurannassa 
+//Päivitä kohdistus vain jos yksittäinen juna seurannassa
 function ChangeView({ center, zoom }) {
   const map = useMap();
   map.setView(center, map.getZoom()); //käytä zoomia jos haluat vakioida zoomin
@@ -78,6 +79,7 @@ function ChangeView({ center, zoom }) {
 }
 
 function SingleTrainMarker(props) {
+  let hasLiveEstimate = props.trainInfo.liveEstimateTime ? true : false;
   return (
     <Marker
       position={props.coordinates}
@@ -90,12 +92,23 @@ function SingleTrainMarker(props) {
       }
     >
       <Popup autoPan={false}>
-        <b>Operaattori: </b> {_.toUpper(props.trainInfo.operatorShortCode)} <br />
-        <b>Juna: </b>{props.trainInfo.trainType} {props.trainInfo.trainNumber} <br />
+        <b>Operaattori: </b> {_.toUpper(props.trainInfo.operatorShortCode)}{" "}
+        <br />
+        <b>Juna: </b>
+        {props.trainInfo.trainType} {props.trainInfo.trainNumber} <br />
         {/*TODO: Hae asematiedot meta-filestä // jostain keksittävä lähimmän ajan haku -> seuraavan aseman tiedot */}
-        <b>Lähtöasema:</b> {props.trainInfo.departure} <br /> 
-        <b>Pääteasema:</b> {props.trainInfo.arrival} <br /><br />
-        <b>Nopeus:</b> {props.trainInfo.speed} km/h<br />
+        <b>Lähtöasema:</b> {props.trainInfo.firstDepartureStation} <br />
+        <b>Pääteasema:</b> {props.trainInfo.lastArrivalStation} <br /><br />
+        <b>Edellinen asema:</b> {props.trainInfo.departure} <br />
+        <b>Seuraava asema:</b> {props.trainInfo.arrival} <br />
+        <b>Aikataulu:</b> {props.trainInfo.scheduledTime} <br />
+
+        {/* Esimerkki if-lausekkeesta templatella */}
+        {hasLiveEstimate && <b>Live - arvioitu saapumisaika:</b>} {props.trainInfo.liveEstimateTime}
+        <br />
+        <br />
+        <b>Nopeus:</b> {props.trainInfo.speed} km/h
+        <br />
         <b>Liikkeessä:</b> {props.trainInfo.runningCurrently} <br />
       </Popup>
     </Marker>
@@ -116,14 +129,14 @@ class MapComponent extends Component {
       allTrains: [],
       allTrainsSelected: false,
       trackTheTrain: false,
-      currentTrain: {}
+      currentTrain: {},
     };
 
     store.subscribe(() => {
       // When state will be updated(in our case, when items will be fetched),
       // we will update local component state and force component to rerender
       // with new data.
-      
+
       this.setState({
         delay: store.getState().train.delay,
         allCoordinates: store.getState().train.allCoordinates,
@@ -133,7 +146,11 @@ class MapComponent extends Component {
         allTrainsSelected: store.getState().train.allTrainsSelected,
         trackTheTrain: store.getState().train.trackTheTrain,
         currentTrain: store.getState().train.currentTrain,
-        coordinates: this.hasCurrentTrain(store.getState().train.currentTrain) ? this.getCorrectCoordinates(store.getState().train.currentTrain.location.coordinates) : [62.24147, 25.72088]
+        coordinates: this.hasCurrentTrain(store.getState().train.currentTrain)
+          ? this.getCorrectCoordinates(
+              store.getState().train.currentTrain.location.coordinates
+            )
+          : [62.24147, 25.72088],
       });
     });
   }
@@ -161,7 +178,7 @@ class MapComponent extends Component {
   }
 
   doTrackTheTrain(prevState) {
-    if(this.state.trackTheTrain) {
+    if (this.state.trackTheTrain) {
       clearInterval(this.interval);
       this.interval = setInterval(this.tick, this.state.delay);
     } else if (!this.state.trackTheTrain) {
@@ -173,10 +190,12 @@ class MapComponent extends Component {
     DigitrafficService.getLatestCoordinate(this.state.currentTrain.trainNumber)
       .then((data) => {
         if (data && data.length > 0) {
-          let coordinate = this.getCorrectCoordinates(data[0].location.coordinates);
+          let coordinate = this.getCorrectCoordinates(
+            data[0].location.coordinates
+          );
           this.setState({
             coordinates: coordinate,
-            currentTrain: data[0]
+            currentTrain: data[0],
           });
           //mapStateToProps ja mapDispatchToProps tarvitaan että data päivittyy kunnolla
           this.props.updatePollingCount();
@@ -210,66 +229,140 @@ class MapComponent extends Component {
       arrival: "",
       departure: "",
     };
-    
+
+    let firstStation = this.getFirstOrLastStation("DEPARTURE", trainInfo);
+    let lastStation = this.getFirstOrLastStation("ARRIVAL", trainInfo);
     let nextArrivalInfo = this.getTimeTableInfo("ARRIVAL", trainInfo);
-    let nextDepartureInfo = this.getTimeTableInfo("DEPARTURE", trainInfo);
-    
-    if ((this.hasSingleTrainSelected() || this.hasAllTrainsSelected()) && trainInfo) {
+    let latestDepartureInfo = this.getTimeTableInfo("DEPARTURE", trainInfo);
+
+    if (
+      (this.hasSingleTrainSelected() || this.hasAllTrainsSelected()) &&
+      trainInfo
+    ) {
       info = {
         trainNumber: currentTrain.trainNumber,
         operatorShortCode: trainInfo.operatorShortCode,
         trainType: trainInfo.trainType,
         runningCurrently: trainInfo.runningCurrently ? "Kyllä" : "Ei",
         speed: currentTrain ? currentTrain.speed : 0,
-        liveEstimateTime: "",
-        scheduledTime: "",
-        departure: nextDepartureInfo ? this.getStationName(nextDepartureInfo.stationShortCode) : "",
-        arrival: nextArrivalInfo ? this.getStationName(nextArrivalInfo.stationShortCode) : "",
+        firstDepartureStation: firstStation
+          ? this.getStationName(firstStation.stationShortCode)
+          : null,
+        lastArrivalStation: lastStation
+          ? this.getStationName(lastStation.stationShortCode)
+          : null,
+        liveEstimateTime:
+          nextArrivalInfo && nextArrivalInfo.liveEstimateTime
+            ? moment(nextArrivalInfo.liveEstimateTime).format("HH:mm:ss")
+            : null,
+        scheduledTime: nextArrivalInfo
+          ? moment(nextArrivalInfo.scheduledTime).format("HH:mm:ss")
+          : null,
+        departure: latestDepartureInfo
+          ? this.getStationName(latestDepartureInfo.stationShortCode)
+          : "",
+        arrival: nextArrivalInfo
+          ? this.getStationName(nextArrivalInfo.stationShortCode)
+          : "",
       };
     }
     return info;
   };
 
   getStationName(stationShortCode) {
-    return stations.find(station => {return station.stationShortCode === stationShortCode;}).stationName;
+    return stations.find((station) => {
+      return station.stationShortCode === stationShortCode;
+    }).stationName;
   }
 
-  getClosestTime(type, trainInfo) {
+  //TODO siirrä näitä myöhemmin helper-luokkaan selkeyden vuoksi
+  getFirstOrLastStation(type, trainInfo) {
+    if (!trainInfo) {
+      return null;
+    }
+
     let currentTime = new moment().valueOf();
-    let filteredTimeTableInfo = trainInfo.timeTableRows.filter(row => {
-      let rowTime = new moment(row.scheduledTime).valueOf();
-      return type === "ARRIVAL" ? 
-             row.type === type && currentTime < rowTime :
-             row.type === type && currentTime > rowTime;
-    }).sort(rowItem => {
-      return moment(rowItem.scheduledTime).valueOf();
-    }).find(rowItem => {
-      return type === "ARRIVAL" ? 
-             moment(rowItem.scheduledTime).isAfter(currentTime) : 
-             moment(rowItem.scheduledTime).isBefore(currentTime);
-    });
-    return filteredTimeTableInfo;
-  }
-
-  getTimeTableInfo(type, trainInfo) {
-    if(trainInfo) {
-      
-      let closestTimeTableInfo = this.getClosestTime(type, trainInfo);
-      if(closestTimeTableInfo) {
-        console.log(closestTimeTableInfo)
-        return closestTimeTableInfo;
-      } else {return null;}
+    let filteredTimeTableInfos = trainInfo.timeTableRows
+      .filter((row) => {
+        let rowTime = new moment(row.scheduledTime).valueOf();
+        return type === "ARRIVAL"
+          ? row.type === type && currentTime < rowTime
+          : row.type === type && currentTime > rowTime;
+      })
+      .sort((rowItem) => {
+        return moment(rowItem.scheduledTime).valueOf();
+      });
+    if (filteredTimeTableInfos) {
+      if (type === "ARRIVAL") {
+        return _.last(filteredTimeTableInfos);
+      } else {
+        return _.first(filteredTimeTableInfos);
+      }
     } else {
       return null;
     }
   }
 
+  getClosestDepartureTime(type, trainInfo) {
+    let currentTime = new moment().valueOf();
+    let filteredTimeTableInfo = trainInfo.timeTableRows
+      .filter((row) => {
+        let rowTime = new moment(row.scheduledTime).valueOf();
+        return row.type === type && currentTime > rowTime;
+      })
+      //Jos haluaa ensimmäisen lähdön (lähtöpiste), käytä sortia
+      .reverse((rowItem) => {
+        return moment(rowItem.scheduledTime).valueOf();
+      })
+      .find((rowItem) => {
+        return moment(rowItem.scheduledTime).isBefore(currentTime);
+      });
+    return filteredTimeTableInfo;
+  }
+
+  getClosestArrivalTime(type, trainInfo) {
+    let currentTime = new moment().valueOf();
+    let filteredTimeTableInfo = trainInfo.timeTableRows
+      .filter((row) => {
+        let rowTime = new moment(row.scheduledTime).valueOf();
+        return row.type === type && currentTime < rowTime;
+      })
+      .sort((rowItem) => {
+        return moment(rowItem.scheduledTime).valueOf();
+      })
+      .find((rowItem) => {
+        return moment(rowItem.scheduledTime).isAfter(currentTime);
+      });
+    console.log(filteredTimeTableInfo);
+    return filteredTimeTableInfo;
+  }
+
+  getTimeTableInfo(type, trainInfo) {
+    if (!trainInfo) {
+      return null;
+    } else {
+      let closestTimeTableInfo =
+        type === "ARRIVAL"
+          ? this.getClosestArrivalTime(type, trainInfo)
+          : this.getClosestDepartureTime(type, trainInfo);
+      return closestTimeTableInfo;
+    }
+  }
+
   hasSingleTrainSelected() {
-    return !this.state.allTrainsSelected && this.state.trainInfo && this.state.trainInfo.length > 0;
+    return (
+      !this.state.allTrainsSelected &&
+      this.state.trainInfo &&
+      this.state.trainInfo.length > 0
+    );
   }
 
   hasAllTrainsSelected() {
-    return this.state.allTrainsSelected && this.props.allTrainInfoToday && this.props.allTrainInfoToday.length > 0;
+    return (
+      this.state.allTrainsSelected &&
+      this.props.allTrainInfoToday &&
+      this.props.allTrainInfoToday.length > 0
+    );
   }
 
   hasCurrentTrain() {
@@ -280,27 +373,48 @@ class MapComponent extends Component {
     let trainInfo = {};
     let currentZoom = this.state.zoom;
     let showAllTrains = <div></div>;
-    let changeView = <div></div> 
+    let changeView = <div></div>;
 
     //Kartan markkereiden asettaminen (kaikki junat vs yksittäinen)
     if (this.state.allTrains && this.state.allTrainsSelected) {
-        showAllTrains = this.state.allTrains.map((item, index) => {
-        let foundTrain = _.find(this.props.allTrainInfoToday, {trainNumber: item.trainNumber});
+      showAllTrains = this.state.allTrains.map((item, index) => {
+        let foundTrain = _.find(this.props.allTrainInfoToday, {
+          trainNumber: item.trainNumber,
+        });
         let coordinates = this.getCorrectCoordinates(item.location.coordinates);
         trainInfo = this.getTrainInfo(foundTrain, item);
-        return <SingleTrainMarker key={index} train={item.trainNumber} trainInfo={trainInfo} 
-                coordinates={coordinates}></SingleTrainMarker>
+        return (
+          <SingleTrainMarker
+            key={index}
+            train={item.trainNumber}
+            trainInfo={trainInfo}
+            coordinates={coordinates}
+          ></SingleTrainMarker>
+        );
       });
     } else {
-        trainInfo = this.getTrainInfo(this.state.trainInfo[0], this.state.currentTrain);
-        let coordinates = this.state.coordinates; 
-        showAllTrains = <SingleTrainMarker coordinates={coordinates} train={this.state.train} 
-                trainInfo={trainInfo}></SingleTrainMarker>
+      trainInfo = this.getTrainInfo(
+        this.state.trainInfo[0],
+        this.state.currentTrain
+      );
+      let coordinates = this.state.coordinates;
+      showAllTrains = (
+        <SingleTrainMarker
+          coordinates={coordinates}
+          train={this.state.train}
+          trainInfo={trainInfo}
+        ></SingleTrainMarker>
+      );
     }
 
     //Kohdista kartta jos vain yksitäinen juna näkyvissä
-    if(!this.state.allTrainsSelected) {
-      changeView = <ChangeView center={this.state.coordinates} zoom={currentZoom}></ChangeView>
+    if (!this.state.allTrainsSelected) {
+      changeView = (
+        <ChangeView
+          center={this.state.coordinates}
+          zoom={currentZoom}
+        ></ChangeView>
+      );
     }
 
     return (
@@ -327,7 +441,7 @@ class MapComponent extends Component {
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png"
           />
-          
+
           {showAllTrains}
         </MapContainer>
       </div>
@@ -340,7 +454,7 @@ function mapDispatchToProps(dispatch) {
     {
       updatePollingCount: updatePollingCount,
       updateAllTrains: updateAllTrains,
-      updateCurrentTrain: updateCurrentTrain
+      updateCurrentTrain: updateCurrentTrain,
     },
     dispatch
   );
@@ -349,7 +463,7 @@ function mapDispatchToProps(dispatch) {
 function mapStateToProps(state) {
   return {
     pollingCount: state.pollingCount,
-    trackTheTrain: state.trackTheTrain
+    trackTheTrain: state.trackTheTrain,
   };
 }
 export default connect(mapStateToProps, mapDispatchToProps)(MapComponent);
