@@ -78,8 +78,42 @@ function ChangeView({ center, zoom }) {
   return null;
 }
 
+function LatestStationsInfo(props) {
+  let scheduleTime = props.hasLiveEstimate ? (
+    <div>
+      <b>Live - arvioitu saapumisaika:</b> {props.trainInfo.liveEstimateTime}
+    </div>
+  ) : (
+    <div>
+      <b>Aikataulu:</b> {props.trainInfo.scheduledTime}
+    </div>
+  );
+
+  return (
+    <div>
+      <b>Edellinen asema:</b> {props.trainInfo.departure} <br />
+      <b>Seuraava asema:</b> {props.trainInfo.arrival} <br />
+      {scheduleTime}
+      {/* Esimerkki if-lausekkeesta templatella 
+      {props.hasLiveEstimate && <b>Live - arvioitu saapumisaika:</b>}{" "}
+      {props.trainInfo.liveEstimateTime} */}
+      <br />
+    </div>
+  );
+}
+
 function SingleTrainMarker(props) {
+  let latestStationsInfos = <div></div>;
   let hasLiveEstimate = props.trainInfo.liveEstimateTime ? true : false;
+  if (!props.allTrainsSelected) {
+    latestStationsInfos = (
+      <LatestStationsInfo
+        trainInfo={props.trainInfo}
+        hasLiveEstimate={hasLiveEstimate}
+      ></LatestStationsInfo>
+    );
+  }
+
   return (
     <Marker
       position={props.coordinates}
@@ -92,22 +126,16 @@ function SingleTrainMarker(props) {
       }
     >
       <Popup autoPan={false}>
-        <h5>{_.toUpper(props.trainInfo.operatorShortCode)} - {props.trainInfo.trainType} {props.trainInfo.trainNumber}</h5>
+        <h5>
+          {_.toUpper(props.trainInfo.operatorShortCode)} -{" "}
+          {props.trainInfo.trainType} {props.trainInfo.trainNumber}
+        </h5>
         {/*TODO: Hae asematiedot meta-filestä // jostain keksittävä lähimmän ajan haku -> seuraavan aseman tiedot */}
-        
         <b>Lähtöasema:</b> {props.trainInfo.firstDepartureStation} <br />
         <b>Pääteasema:</b> {props.trainInfo.lastArrivalStation} <br />
         <b>Aikataulu:</b> {props.trainInfo.lastArrivalStationTime} <br />
         <br />
-
-        <b>Edellinen asema:</b> {props.trainInfo.departure} <br />
-        <b>Seuraava asema:</b> {props.trainInfo.arrival} <br />
-        <b>Aikataulu:</b> {props.trainInfo.scheduledTime} <br />
-
-        {/* Esimerkki if-lausekkeesta templatella */}
-        {hasLiveEstimate && <b>Live - arvioitu saapumisaika:</b>} {props.trainInfo.liveEstimateTime}
-        <br />
-        <br />
+        {latestStationsInfos}
         <b>Nopeus:</b> {props.trainInfo.speed} km/h
         <br />
         <b>Liikkeessä:</b> {props.trainInfo.runningCurrently} <br />
@@ -256,18 +284,23 @@ class MapComponent extends Component {
           ? moment(lastStation.scheduledTime).format("HH:mm:ss")
           : null,
         liveEstimateTime:
-          nextArrivalInfo && nextArrivalInfo.liveEstimateTime
+          nextArrivalInfo &&
+          nextArrivalInfo.liveEstimateTime &&
+          !this.state.allTrainsSelected
             ? moment(nextArrivalInfo.liveEstimateTime).format("HH:mm:ss")
             : null,
-        scheduledTime: nextArrivalInfo
-          ? moment(nextArrivalInfo.scheduledTime).format("HH:mm:ss")
-          : null,
-        departure: latestDepartureInfo
-          ? this.getStationName(latestDepartureInfo.stationShortCode)
-          : "",
-        arrival: nextArrivalInfo
-          ? this.getStationName(nextArrivalInfo.stationShortCode)
-          : "",
+        scheduledTime:
+          nextArrivalInfo && !this.state.allTrainsSelected
+            ? moment(nextArrivalInfo.scheduledTime).format("HH:mm:ss")
+            : null,
+        departure:
+          latestDepartureInfo && !this.state.allTrainsSelected
+            ? this.getStationName(latestDepartureInfo.stationShortCode)
+            : "",
+        arrival:
+          nextArrivalInfo && !this.state.allTrainsSelected
+            ? this.getStationName(nextArrivalInfo.stationShortCode)
+            : "",
       };
     }
     return info;
@@ -285,16 +318,10 @@ class MapComponent extends Component {
       return null;
     }
 
-    let currentTime = new moment().valueOf();
     let filteredTimeTableInfos = trainInfo.timeTableRows
-      .filter((row) => {
-        let rowTime = new moment(row.scheduledTime).valueOf();
-        return type === "ARRIVAL"
-          ? row.type === type && currentTime < rowTime
-          : row.type === type && currentTime > rowTime;
-      })
+      .slice()
       .sort((rowItem) => {
-        return moment(rowItem.scheduledTime).valueOf();
+        return rowItem.scheduledTime && moment(rowItem.scheduledTime).valueOf();
       });
     if (filteredTimeTableInfos) {
       if (type === "ARRIVAL") {
@@ -342,7 +369,7 @@ class MapComponent extends Component {
   }
 
   getTimeTableInfo(type, trainInfo) {
-    if (!trainInfo) {
+    if (!trainInfo || this.state.allTrainsSelected) {
       return null;
     } else {
       let closestTimeTableInfo =
@@ -393,6 +420,7 @@ class MapComponent extends Component {
             train={item.trainNumber}
             trainInfo={trainInfo}
             coordinates={coordinates}
+            allTrainsSelected={this.state.allTrainsSelected}
           ></SingleTrainMarker>
         );
       });
@@ -407,6 +435,7 @@ class MapComponent extends Component {
           coordinates={coordinates}
           train={this.state.train}
           trainInfo={trainInfo}
+          allTrainsSelected={this.state.allTrainsSelected}
         ></SingleTrainMarker>
       );
     }
