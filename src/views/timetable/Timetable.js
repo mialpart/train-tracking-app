@@ -1,19 +1,17 @@
-
-import logo from './../../assets/images/logo.svg';
-import TrainDropDown from '../../components/forms/TrainDropDown';
-import './Timetable.css';
+import logo from "./../../assets/images/logo.svg";
+import TrainDropDown from "../../components/forms/TrainDropDown";
+import "./Timetable.css";
 
 import _ from "lodash";
 import { Component } from "react";
 import store from "./../../store/train";
 import DigitrafficService from "../../services/DigitrafficService";
-import {getAllDropDownTrains} from "../../utils/functions/Trains";
+import { getAllDropDownTrains } from "../../utils/functions/Trains";
 import "./Timetable.css";
 import "leaflet/dist/leaflet.css";
 import { connect } from "react-redux";
 import { withTranslation } from "react-i18next";
-import moment from 'moment';
-
+import moment from "moment";
 
 class Timetable extends Component {
   constructor(props) {
@@ -23,7 +21,7 @@ class Timetable extends Component {
       allTrains: [],
       pollingCount: 0,
       currentTrain: {},
-      trainInfo: {}
+      trainInfo: {},
     };
 
     store.subscribe(() => {
@@ -34,7 +32,7 @@ class Timetable extends Component {
         allTrains: store.getState().train.allTrains,
         pollingCount: store.getState().train.pollingCount,
         currentTrain: store.getState().train.currentTrain,
-        trainInfo: store.getState().train.trainInfo
+        trainInfo: store.getState().train.trainInfo,
       });
     });
   }
@@ -67,23 +65,44 @@ class Timetable extends Component {
       });
   }
 
+  //TODO hae lähin aika ja laita värikoodaus
   render() {
-    let currentTrain = !_.isEmpty(this.state.currentTrain) ? this.state.currentTrain : null;
-    let allTrains = getAllDropDownTrains(this.state.allTrains, this.state.allTrainInfoToday);
+    let currentTrain = !_.isEmpty(this.state.currentTrain)
+      ? this.state.currentTrain
+      : null;
+    let allTrains = getAllDropDownTrains(
+      this.state.allTrains,
+      this.state.allTrainInfoToday
+    );
     const { t } = this.props;
-    console.log(this.state.trainInfo[0])
+    console.log(this.state.trainInfo[0]);
     let timeTableList = <div></div>;
-    if(this.state.trainInfo[0]) {
-      let listElement = this.state.trainInfo[0].timeTableRows.map((timeTableRow, index) => {
-          if(timeTableRow.actualTime && timeTableRow.stationShortCode) {
-            return <li>
-              actualTime: {moment(timeTableRow.actualTime).format("HH:mm:ss")},
-              stationShortCode: {timeTableRow.stationShortCode},
-              type: {timeTableRow.type}
-            </li>;
+    if (this.state.trainInfo[0]) {
+      let listElement = this.state.trainInfo[0].timeTableRows.map(
+        (timeTableRow, index) => {
+          if (timeTableRow.actualTime && timeTableRow.stationShortCode) {
+            return (
+              <tr>
+                <td>{moment(timeTableRow.actualTime).format("HH:mm:ss")}</td>
+                <td>{timeTableRow.stationShortCode}</td>
+                <td>{timeTableRow.type}</td>
+              </tr>
+            );
           }
-      })
-      timeTableList = <ul>{listElement}</ul>;
+        }
+      );
+      timeTableList = (
+        <table class="ui celled table timetable-table">
+          <thead>
+            <tr>
+              <th>Aika</th>
+              <th>Asema</th>
+              <th>Tyyppi</th>
+            </tr>
+          </thead>
+          <tbody>{listElement}</tbody>
+        </table>
+      );
     }
     return (
       <div>
@@ -104,7 +123,7 @@ function mapStateToProps(state) {
   return {
     pollingCount: state.pollingCount,
     currentTrain: state.currentTrain,
-    trainInfo: state.trainInfo
+    trainInfo: state.trainInfo,
   };
 }
 
