@@ -11,6 +11,10 @@ import "./Timetable.css";
 import "leaflet/dist/leaflet.css";
 import { connect } from "react-redux";
 import { withTranslation } from "react-i18next";
+import {
+  getStationName,
+  getTypeName
+} from "./../../utils/functions/Trains";
 import moment from "moment";
 
 class Timetable extends Component {
@@ -84,8 +88,8 @@ class Timetable extends Component {
             return (
               <tr>
                 <td>{moment(timeTableRow.actualTime).format("HH:mm:ss")}</td>
-                <td>{timeTableRow.stationShortCode}</td>
-                <td>{timeTableRow.type}</td>
+                <td>{getStationName(timeTableRow.stationShortCode)}</td>
+                <td>{getTypeName(timeTableRow.type)}</td>
               </tr>
             );
           }

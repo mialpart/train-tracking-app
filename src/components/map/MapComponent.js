@@ -19,10 +19,10 @@ import {
 } from "../../store/features/trainSlicer";
 import { Component } from "react";
 import { bindActionCreators } from "redux";
-import { Icon, Point } from "leaflet";
+import { Icon } from "leaflet";
 import { connect } from "react-redux";
-import stations from "./../../assets/metadata/stations.json";
 import moment from "moment";
+import { getStationName, getFirstOrLastStation, getTimeTableInfo } from "./../../utils/functions/Trains";
 import "moment/locale/fi"; // without this line it didn't work
 moment.locale("fi");
 
@@ -264,10 +264,10 @@ class MapComponent extends Component {
       departure: "",
     };
 
-    let firstStation = this.getFirstOrLastStation("DEPARTURE", trainInfo);
-    let lastStation = this.getFirstOrLastStation("ARRIVAL", trainInfo);
-    let nextArrivalInfo = this.getTimeTableInfo("ARRIVAL", trainInfo);
-    let latestDepartureInfo = this.getTimeTableInfo("DEPARTURE", trainInfo);
+    let firstStation = getFirstOrLastStation("DEPARTURE", trainInfo);
+    let lastStation = getFirstOrLastStation("ARRIVAL", trainInfo);
+    let nextArrivalInfo = getTimeTableInfo("ARRIVAL", trainInfo, this.state.allTrainsSelected);
+    let latestDepartureInfo = getTimeTableInfo("DEPARTURE", trainInfo, this.state.allTrainsSelected);
 
     if (
       (this.hasSingleTrainSelected() || this.hasAllTrainsSelected()) &&
@@ -280,10 +280,10 @@ class MapComponent extends Component {
         runningCurrently: trainInfo.runningCurrently ? "Kyllä" : "Ei",
         speed: currentTrain ? currentTrain.speed : 0,
         firstDepartureStation: firstStation
-          ? this.getStationName(firstStation.stationShortCode)
+          ? getStationName(firstStation.stationShortCode)
           : null,
         lastArrivalStation: lastStation
-          ? this.getStationName(lastStation.stationShortCode)
+          ? getStationName(lastStation.stationShortCode)
           : null,
         lastArrivalStationTime: lastStation
           ? moment(lastStation.scheduledTime).format("HH:mm:ss")
@@ -300,89 +300,16 @@ class MapComponent extends Component {
             : null,
         departure:
           latestDepartureInfo && !this.state.allTrainsSelected
-            ? this.getStationName(latestDepartureInfo.stationShortCode)
+            ? getStationName(latestDepartureInfo.stationShortCode)
             : "",
         arrival:
           nextArrivalInfo && !this.state.allTrainsSelected
-            ? this.getStationName(nextArrivalInfo.stationShortCode)
+            ? getStationName(nextArrivalInfo.stationShortCode)
             : "",
       };
     }
     return info;
   };
-
-  getStationName(stationShortCode) {
-    return stations.find((station) => {
-      return station.stationShortCode === stationShortCode;
-    }).stationName;
-  }
-
-  //TODO siirrä näitä myöhemmin helper-luokkaan selkeyden vuoksi
-  getFirstOrLastStation(type, trainInfo) {
-    if (!trainInfo) {
-      return null;
-    }
-
-    let filteredTimeTableInfos = trainInfo.timeTableRows
-      .slice()
-      .sort((rowItem) => {
-        return rowItem.scheduledTime && moment(rowItem.scheduledTime).valueOf();
-      });
-    if (filteredTimeTableInfos) {
-      if (type === "ARRIVAL") {
-        return _.last(filteredTimeTableInfos);
-      } else {
-        return _.first(filteredTimeTableInfos);
-      }
-    } else {
-      return null;
-    }
-  }
-
-  getClosestDepartureTime(type, trainInfo) {
-    let currentTime = new moment().valueOf();
-    let filteredTimeTableInfo = trainInfo.timeTableRows
-      .filter((row) => {
-        let rowTime = new moment(row.scheduledTime).valueOf();
-        return row.type === type && currentTime > rowTime;
-      })
-      //Jos haluaa ensimmäisen lähdön (lähtöpiste), käytä sortia
-      .reverse((rowItem) => {
-        return moment(rowItem.scheduledTime).valueOf();
-      })
-      .find((rowItem) => {
-        return moment(rowItem.scheduledTime).isBefore(currentTime);
-      });
-    return filteredTimeTableInfo;
-  }
-
-  getClosestArrivalTime(type, trainInfo) {
-    let currentTime = new moment().valueOf();
-    let filteredTimeTableInfo = trainInfo.timeTableRows
-      .filter((row) => {
-        let rowTime = new moment(row.scheduledTime).valueOf();
-        return row.type === type && currentTime < rowTime;
-      })
-      .sort((rowItem) => {
-        return moment(rowItem.scheduledTime).valueOf();
-      })
-      .find((rowItem) => {
-        return moment(rowItem.scheduledTime).isAfter(currentTime);
-      });
-    return filteredTimeTableInfo;
-  }
-
-  getTimeTableInfo(type, trainInfo) {
-    if (!trainInfo || this.state.allTrainsSelected) {
-      return null;
-    } else {
-      let closestTimeTableInfo =
-        type === "ARRIVAL"
-          ? this.getClosestArrivalTime(type, trainInfo)
-          : this.getClosestDepartureTime(type, trainInfo);
-      return closestTimeTableInfo;
-    }
-  }
 
   hasSingleTrainSelected() {
     return (
