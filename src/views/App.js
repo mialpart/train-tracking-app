@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import MapView from "./../views/map/MapView";
+import TimetableView from "./../views/timetable/Timetable";
 import NavBar from "./../components/nav/NavBar";
 import { Localization } from "../utils/i18n-helper";
 
@@ -12,6 +13,7 @@ function RouterComponent() {
       <NavBar />
       <Route path="/" exact render={() => <MapView />} />
       <Route path="/map" exact render={() => <MapView />} />
+      <Route path="/timetable" exact render={() => <TimetableView />} />
       {/*
         Toistaiseksi piiloon
       <Route path="/about" exact render={() => <About />} />

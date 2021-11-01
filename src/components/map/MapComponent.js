@@ -19,7 +19,7 @@ import {
 } from "../../store/features/trainSlicer";
 import { Component } from "react";
 import { bindActionCreators } from "redux";
-import { Icon } from "leaflet";
+import { Icon, Point } from "leaflet";
 import { connect } from "react-redux";
 import stations from "./../../assets/metadata/stations.json";
 import moment from "moment";
@@ -29,7 +29,7 @@ moment.locale("fi");
 //Karttatasot omaan funktioon
 function MapLayersControl() {
   return (
-    <LayersControl position="topright">
+    <LayersControl position="bottomright">
       <LayersControl.BaseLayer name="Mapnik">
         <TileLayer
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -74,7 +74,12 @@ function MapLayersControl() {
 //Päivitä kohdistus vain jos yksittäinen juna seurannassa
 function ChangeView({ center, zoom }) {
   const map = useMap();
+  
+  let boundsNorthEast = map.getBounds()._northEast;
+  let centerNearBottom = (boundsNorthEast.lat + (center[0] * 3)) / 4;
+  let newCenter = [centerNearBottom, center[1]];
   map.setView(center, map.getZoom()); //käytä zoomia jos haluat vakioida zoomin
+    
   return null;
 }
 
@@ -364,7 +369,6 @@ class MapComponent extends Component {
       .find((rowItem) => {
         return moment(rowItem.scheduledTime).isAfter(currentTime);
       });
-    console.log(filteredTimeTableInfo);
     return filteredTimeTableInfo;
   }
 

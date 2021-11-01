@@ -69,6 +69,14 @@ class NavBar extends Component {
             active={activeItem === "map"}
             onClick={this.handleItemClick}
           />
+          <Menu.Item
+            className="menu-item"
+            as={NavLink}
+            to="/timetable"
+            name={t('timetable')}
+            active={activeItem === "timetable"}
+            onClick={this.handleItemClick}
+          />
           <Menu.Item className="menu-item">
             <LangDropDown
             ></LangDropDown>

@@ -6,5 +6,6 @@
     "show-all-trains": "Näytä kaikki junat kartalla",
     "select-train": "Valitse juna",
     "update-trains-popup-text": "Päivittää junien lokaatiot 5 sekunnin välein.",
-    "follow-train": "Seuraa junaa"
+    "follow-train": "Seuraa junaa",
+    "timetable": "Aikataulut"
   }
