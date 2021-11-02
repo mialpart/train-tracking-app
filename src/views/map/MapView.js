@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { Component } from "react";
 import store from "./../../store/train";
 import DigitrafficService from "../../services/DigitrafficService";

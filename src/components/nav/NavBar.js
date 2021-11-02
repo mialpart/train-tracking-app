@@ -1,12 +1,11 @@
 import React, { Component } from "react";
 import { Dropdown, Menu } from "semantic-ui-react";
-import { NavLink, withRouter } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import trainImage from "./../../assets/images/train-tunnel.svg";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { useTranslation, withTranslation } from "react-i18next";
 import { updateLanguage } from "../../store/features/trainSlicer";
-import { Localization } from "../../utils/i18n-helper";
 
 import "./NavBar.css";
 
@@ -48,8 +47,6 @@ class NavBar extends Component {
   render() {
     const { activeItem } = this.state;
     const { t } = this.props;
-    console.log(t)
-    console.log(t('map'))
     return (
       <div>
         <Menu

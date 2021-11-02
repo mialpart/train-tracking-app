@@ -1,6 +1,4 @@
 import "./Form.css";
-
-import _ from "lodash";
 import TrainDropDown from './TrainDropDown';
 import { Button, Popup } from "semantic-ui-react";
 import { useDispatch } from "react-redux";

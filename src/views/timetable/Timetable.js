@@ -1,4 +1,3 @@
-import logo from "./../../assets/images/logo.svg";
 import TrainDropDown from "../../components/forms/TrainDropDown";
 import "./Timetable.css";
 
@@ -79,7 +78,6 @@ class Timetable extends Component {
       this.state.allTrainInfoToday
     );
     const { t } = this.props;
-    console.log(this.state.trainInfo[0]);
     let timeTableList = <div></div>;
     if (this.state.trainInfo[0]) {
       let listElement = this.state.trainInfo[0].timeTableRows.map(
@@ -92,11 +90,13 @@ class Timetable extends Component {
                 <td>{getTypeName(timeTableRow.type)}</td>
               </tr>
             );
+          } else {
+            return <tr></tr>;
           }
         }
       );
       timeTableList = (
-        <table class="ui celled table timetable-table">
+        <table class="ui celled striped table timetable-table">
           <thead>
             <tr>
               <th>Aika</th>
